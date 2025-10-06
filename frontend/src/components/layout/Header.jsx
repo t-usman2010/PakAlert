@@ -15,7 +15,7 @@ import {
   Droplets
 } from 'lucide-react';
 
-const Header = ({ timeOfDay }) => {
+const Header = ({ theme }) => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -56,7 +56,7 @@ const Header = ({ timeOfDay }) => {
         {/* Main Header Container */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className={`rounded-2xl p-6 backdrop-blur-sm border ${
-            timeOfDay === "day" 
+            theme === "light" 
               ? "bg-white/80 border-white/50 shadow-lg" 
               : "bg-blue-900/30 border-blue-700/30 shadow-xl"
           }`}>
@@ -69,7 +69,7 @@ const Header = ({ timeOfDay }) => {
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
                 <div className={`p-3 rounded-xl ${
-                  timeOfDay === "day" 
+                  theme === "light" 
                     ? "bg-gradient-to-br from-blue-500 to-cyan-400 shadow-lg" 
                     : "bg-gradient-to-br from-blue-400 to-cyan-300 shadow-lg"
                 }`}>
@@ -81,7 +81,7 @@ const Header = ({ timeOfDay }) => {
                   </h1>
                   <div className="flex items-center space-x-1 text-sm opacity-80">
                     <MapPin size={14} />
-                    <span className={timeOfDay === "day" ? "text-gray-800" : "text-blue-100"}>
+                    <span className={theme === "light" ? "text-gray-800" : "text-blue-100"}>
                       Pakistan Weather Monitoring With Real Time Alerts
                     </span>
                   </div>
@@ -102,10 +102,10 @@ const Header = ({ timeOfDay }) => {
                         to={item.path}
                         className={`flex items-center space-x-2 px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
                           isActive
-                            ? timeOfDay === "day"
+                            ? theme === "light"
                               ? "bg-blue-500 text-white shadow-md"
                               : "bg-blue-400 text-white shadow-md"
-                            : timeOfDay === "day"
+                            : theme === "light"
                             ? "text-blue-600 hover:bg-blue-50 hover:text-blue-700"
                             : "text-blue-200 hover:bg-blue-800/30 hover:text-white"
                         }`}
@@ -122,7 +122,7 @@ const Header = ({ timeOfDay }) => {
               <motion.button
                 onClick={toggleMobileMenu}
                 className={`md:hidden p-2 rounded-lg ${
-                  timeOfDay === "day" 
+                  theme === "light" 
                     ? "bg-blue-100 text-blue-600" 
                     : "bg-blue-800/30 text-blue-200"
                 }`}
@@ -136,7 +136,7 @@ const Header = ({ timeOfDay }) => {
             {/* Weather Status Bar */}
             <motion.div 
               className={`flex items-center justify-between p-4 rounded-lg ${
-                timeOfDay === "day" 
+                theme === "light" 
                   ? "bg-blue-50/80 border border-blue-100" 
                   : "bg-blue-800/20 border border-blue-700/20"
               }`}
@@ -155,29 +155,29 @@ const Header = ({ timeOfDay }) => {
                     >
                       <item.icon 
                         size={20} 
-                        className={timeOfDay === "day" ? "text-blue-500" : "text-blue-300"} 
+                        className={theme === "light" ? "text-blue-500" : "text-blue-300"} 
                       />
                     </motion.div>
                   ))}
                 </div>
                 <div>
                   <span className={`text-sm font-medium ${
-                    timeOfDay === "day" ? "text-blue-800" : "text-blue-100"
+                    theme === "light" ? "text-blue-800" : "text-blue-100"
                   }`}>
                     Live Weather Updates
                   </span>
                   <div className="flex items-center space-x-2 text-xs opacity-80">
-                    {timeOfDay === "day" ? (
+                    {theme === "light" ? (
                       <>
                         <Sun size={12} className="text-yellow-500" />
-                        <span className={timeOfDay === "day" ? "text-gray-600" : "text-blue-300"}>
-                          Day Mode
+                        <span className="text-gray-600">
+                          Light Mode
                         </span>
                       </>
                     ) : (
                       <>
                         <Moon size={12} className="text-blue-300" />
-                        <span className="text-blue-300">Night Mode</span>
+                        <span className="text-blue-300">Dark Mode</span>
                       </>
                     )}
                   </div>
@@ -186,7 +186,7 @@ const Header = ({ timeOfDay }) => {
 
               {/* Current Time */}
               <div className={`text-sm font-medium ${
-                timeOfDay === "day" ? "text-gray-800" : "text-blue-100"
+                theme === "light" ? "text-gray-800" : "text-blue-100"
               }`}>
                 {new Date().toLocaleTimeString([], { 
                   hour: '2-digit', 
@@ -217,7 +217,7 @@ const Header = ({ timeOfDay }) => {
                 exit={{ opacity: 0, x: 300 }}
                 transition={{ type: "spring", damping: 25 }}
                 className={`fixed top-24 right-4 w-64 rounded-2xl p-4 z-50 shadow-2xl md:hidden ${
-                  timeOfDay === "day" 
+                  theme === "light" 
                     ? "bg-white/95 backdrop-blur-sm" 
                     : "bg-blue-900/95 backdrop-blur-sm"
                 }`}
@@ -236,10 +236,10 @@ const Header = ({ timeOfDay }) => {
                           onClick={toggleMobileMenu}
                           className={`flex items-center space-x-3 p-3 rounded-xl transition-all ${
                             isActive
-                              ? timeOfDay === "day"
+                              ? theme === "light"
                                 ? "bg-blue-500 text-white"
                                 : "bg-blue-400 text-white"
-                              : timeOfDay === "day"
+                              : theme === "light"
                               ? "text-gray-700 hover:bg-blue-50"
                               : "text-blue-200 hover:bg-blue-800/30"
                           }`}
@@ -248,7 +248,7 @@ const Header = ({ timeOfDay }) => {
                           <div>
                             <div className="font-medium">{item.name}</div>
                             <div className={`text-xs ${
-                              isActive ? "text-white/80" : timeOfDay === "day" ? "text-gray-500" : "text-blue-300/80"
+                              isActive ? "text-white/80" : theme === "light" ? "text-gray-500" : "text-blue-300/80"
                             }`}>
                               {item.description}
                             </div>
@@ -262,14 +262,14 @@ const Header = ({ timeOfDay }) => {
                 {/* Mobile Menu Footer */}
                 <motion.div 
                   className={`mt-4 pt-4 border-t ${
-                    timeOfDay === "day" ? "border-gray-200" : "border-blue-700/30"
+                    theme === "light" ? "border-gray-200" : "border-blue-700/30"
                   }`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
                   <div className={`text-xs text-center ${
-                    timeOfDay === "day" ? "text-gray-500" : "text-blue-300/70"
+                    theme === "light" ? "text-gray-500" : "text-blue-300/70"
                   }`}>
                     PakWeather v1.0.0 © 2025
                   </div>

@@ -1,47 +1,63 @@
 import React from "react";
-import { Thermometer, Droplets, Wind, MapPin, Eye, Cloud, Sun, CloudRain, CloudSnow, CloudDrizzle } from "lucide-react";
+import { Thermometer, Droplets, Wind, MapPin, Eye, Cloud, Sun, CloudRain, CloudSnow, CloudDrizzle, Clock } from "lucide-react";
 
-export default function WeatherCard({ city, data }) {
+export default function WeatherCard({ city, data, theme }) {
   if (!data) return null;
+
+  const isLight = theme === "light";
 
   // Function to get weather icon based on description
   const getWeatherIcon = (description) => {
     const desc = description?.toLowerCase() || '';
     
     if (desc.includes('sun') || desc.includes('clear')) {
-      return <Sun className="text-yellow-500" size={32} />;
+      return <Sun className={isLight ? "text-yellow-500" : "text-yellow-400"} size={32} />;
     } else if (desc.includes('rain') || desc.includes('drizzle')) {
-      return <CloudRain className="text-blue-500" size={32} />;
+      return <CloudRain className={isLight ? "text-blue-500" : "text-blue-400"} size={32} />;
     } else if (desc.includes('snow') || desc.includes('blizzard')) {
-      return <CloudSnow className="text-blue-300" size={32} />;
+      return <CloudSnow className={isLight ? "text-blue-300" : "text-blue-300"} size={32} />;
     } else if (desc.includes('cloud') || desc.includes('overcast')) {
-      return <Cloud className="text-gray-500" size={32} />;
+      return <Cloud className={isLight ? "text-gray-500" : "text-gray-400"} size={32} />;
     } else if (desc.includes('drizzle')) {
-      return <CloudDrizzle className="text-blue-400" size={32} />;
+      return <CloudDrizzle className={isLight ? "text-blue-400" : "text-blue-300"} size={32} />;
     } else {
-      return <Cloud className="text-gray-400" size={32} />;
+      return <Cloud className={isLight ? "text-gray-400" : "text-gray-500"} size={32} />;
     }
   };
 
-  // Function to get background gradient based on temperature
+  // Function to get background gradient based on temperature and theme
   const getBackgroundGradient = (temp) => {
-    if (temp === undefined || temp === null) return 'from-blue-100 to-blue-200';
-    if (temp >= 30) return 'from-red-100 to-orange-200';
-    if (temp >= 20) return 'from-yellow-100 to-orange-100';
-    if (temp >= 10) return 'from-green-100 to-blue-100';
-    if (temp >= 0) return 'from-blue-100 to-cyan-100';
-    return 'from-cyan-100 to-blue-200';
+    if (temp === undefined || temp === null) {
+      return isLight ? 'from-blue-100 to-blue-200' : 'from-blue-900/40 to-blue-800/50';
+    }
+    if (temp >= 30) {
+      return isLight ? 'from-red-100 to-orange-200' : 'from-red-900/40 to-orange-900/50';
+    }
+    if (temp >= 20) {
+      return isLight ? 'from-yellow-100 to-orange-100' : 'from-yellow-900/40 to-orange-900/50';
+    }
+    if (temp >= 10) {
+      return isLight ? 'from-green-100 to-blue-100' : 'from-green-900/40 to-blue-900/50';
+    }
+    if (temp >= 0) {
+      return isLight ? 'from-blue-100 to-cyan-100' : 'from-blue-900/40 to-cyan-900/50';
+    }
+    return isLight ? 'from-cyan-100 to-blue-200' : 'from-cyan-900/40 to-blue-900/50';
   };
 
   const temperature = data.temperature !== undefined ? data.temperature.toFixed(1) : "—";
   const gradientClass = getBackgroundGradient(data.temperature);
 
   return (
-    <div className={`bg-gradient-to-br ${gradientClass} rounded-2xl shadow-lg p-6 text-center transition-all duration-300 hover:shadow-xl`}>
+    <div className={`bg-gradient-to-br ${gradientClass} rounded-2xl shadow-lg p-6 text-center transition-all duration-300 hover:shadow-xl backdrop-blur-sm border ${
+      isLight ? "border-white/50" : "border-blue-700/30"
+    }`}>
       {/* Header */}
       <div className="flex items-center justify-center mb-4">
-        <MapPin className="text-gray-700 mr-2" size={18} />
-        <h2 className="text-xl font-semibold text-gray-900 capitalize">
+        <MapPin className={isLight ? "text-gray-700" : "text-blue-200"} size={18} />
+        <h2 className={`text-xl font-semibold capitalize ml-2 ${
+          isLight ? "text-gray-900" : "text-white"
+        }`}>
           {data.city || city}
         </h2>
       </div>
@@ -52,37 +68,61 @@ export default function WeatherCard({ city, data }) {
           {getWeatherIcon(data.description)}
         </div>
         <div>
-          <p className="text-5xl font-bold text-gray-800 mb-1">
+          <p className={`text-5xl font-bold mb-1 ${
+            isLight ? "text-gray-800" : "text-white"
+          }`}>
             {temperature}°C
           </p>
-          <p className="text-gray-600 capitalize text-sm font-medium">
+          <p className={`capitalize text-sm font-medium ${
+            isLight ? "text-gray-600" : "text-blue-200"
+          }`}>
             {data.description || "—"}
           </p>
         </div>
       </div>
 
       {/* Weather Details */}
-      <div className="bg-white/50 backdrop-blur-sm rounded-xl p-4 mt-4">
+      <div className={`rounded-xl p-4 mt-4 backdrop-blur-sm border ${
+        isLight 
+          ? "bg-white/50 border-white/30" 
+          : "bg-blue-800/30 border-blue-700/30"
+      }`}>
         <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center justify-center">
-            <div className="bg-blue-100 p-2 rounded-lg mr-3">
-              <Droplets className="text-blue-600" size={20} />
+            <div className={`p-2 rounded-xl mr-3 ${
+              isLight ? "bg-blue-100" : "bg-blue-700/50"
+            }`}>
+              <Droplets className={isLight ? "text-blue-600" : "text-blue-300"} size={20} />
             </div>
             <div className="text-left">
-              <p className="text-xs text-gray-500">Humidity</p>
-              <p className="font-semibold text-gray-800">
+              <p className={`text-xs ${
+                isLight ? "text-gray-500" : "text-blue-300"
+              }`}>
+                Humidity
+              </p>
+              <p className={`font-semibold ${
+                isLight ? "text-gray-800" : "text-white"
+              }`}>
                 {data.humidity !== null ? `${data.humidity}%` : "—"}
               </p>
             </div>
           </div>
 
           <div className="flex items-center justify-center">
-            <div className="bg-green-100 p-2 rounded-lg mr-3">
-              <Wind className="text-green-600" size={20} />
+            <div className={`p-2 rounded-xl mr-3 ${
+              isLight ? "bg-green-100" : "bg-green-700/50"
+            }`}>
+              <Wind className={isLight ? "text-green-600" : "text-green-300"} size={20} />
             </div>
             <div className="text-left">
-              <p className="text-xs text-gray-500">Wind Speed</p>
-              <p className="font-semibold text-gray-800">
+              <p className={`text-xs ${
+                isLight ? "text-gray-500" : "text-green-300"
+              }`}>
+                Wind Speed
+              </p>
+              <p className={`font-semibold ${
+                isLight ? "text-gray-800" : "text-white"
+              }`}>
                 {data.windSpeed !== null ? `${data.windSpeed} m/s` : "—"}
               </p>
             </div>
@@ -91,15 +131,25 @@ export default function WeatherCard({ city, data }) {
 
         {/* Additional weather data if available */}
         {(data.feelsLike !== undefined || data.pressure !== undefined) && (
-          <div className="grid grid-cols-2 gap-4 mt-3 pt-3 border-t border-white/30">
+          <div className={`grid grid-cols-2 gap-4 mt-3 pt-3 border-t ${
+            isLight ? "border-gray-200" : "border-blue-700/30"
+          }`}>
             {data.feelsLike !== undefined && (
               <div className="flex items-center justify-center">
-                <div className="bg-orange-100 p-2 rounded-lg mr-3">
-                  <Thermometer className="text-orange-600" size={20} />
+                <div className={`p-2 rounded-xl mr-3 ${
+                  isLight ? "bg-orange-100" : "bg-orange-700/50"
+                }`}>
+                  <Thermometer className={isLight ? "text-orange-600" : "text-orange-300"} size={20} />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs text-gray-500">Feels Like</p>
-                  <p className="font-semibold text-gray-800">
+                  <p className={`text-xs ${
+                    isLight ? "text-gray-500" : "text-orange-300"
+                  }`}>
+                    Feels Like
+                  </p>
+                  <p className={`font-semibold ${
+                    isLight ? "text-gray-800" : "text-white"
+                  }`}>
                     {data.feelsLike.toFixed(1)}°C
                   </p>
                 </div>
@@ -108,12 +158,20 @@ export default function WeatherCard({ city, data }) {
 
             {data.pressure !== undefined && (
               <div className="flex items-center justify-center">
-                <div className="bg-purple-100 p-2 rounded-lg mr-3">
-                  <Eye className="text-purple-600" size={20} />
+                <div className={`p-2 rounded-xl mr-3 ${
+                  isLight ? "bg-purple-100" : "bg-purple-700/50"
+                }`}>
+                  <Eye className={isLight ? "text-purple-600" : "text-purple-300"} size={20} />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs text-gray-500">Pressure</p>
-                  <p className="font-semibold text-gray-800">
+                  <p className={`text-xs ${
+                    isLight ? "text-gray-500" : "text-purple-300"
+                  }`}>
+                    Pressure
+                  </p>
+                  <p className={`font-semibold ${
+                    isLight ? "text-gray-800" : "text-white"
+                  }`}>
                     {data.pressure} hPa
                   </p>
                 </div>
@@ -125,7 +183,9 @@ export default function WeatherCard({ city, data }) {
 
       {/* Last Updated */}
       {data.lastUpdated && (
-        <div className="mt-4 text-xs text-gray-600 flex items-center justify-center">
+        <div className={`mt-4 text-xs flex items-center justify-center ${
+          isLight ? "text-gray-600" : "text-blue-300"
+        }`}>
           <Clock size={12} className="mr-1" />
           Updated {new Date(data.lastUpdated).toLocaleTimeString()}
         </div>

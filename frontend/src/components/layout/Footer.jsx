@@ -13,8 +13,9 @@ import {
   Instagram
 } from 'lucide-react';
 
-const Footer = ({ timeOfDay, lastUpdate }) => {
+const Footer = ({ theme, lastUpdate }) => {
   const currentYear = new Date().getFullYear();
+  const isLight = theme === "light";
   
   const footerLinks = [
     {
@@ -47,8 +48,8 @@ const Footer = ({ timeOfDay, lastUpdate }) => {
   return (
     <motion.footer 
       className={`mt-16 pt-8 pb-6 relative z-10 ${
-        timeOfDay === "day" 
-          ? "border-t border-blue-100/50" 
+        isLight 
+          ? "border-t border-gray-200/50" 
           : "border-t border-blue-700/20"
       }`}
       initial={{ opacity: 0, y: 20 }}
@@ -67,10 +68,10 @@ const Footer = ({ timeOfDay, lastUpdate }) => {
           {weatherStats.map((stat, index) => (
             <motion.div
               key={stat.label}
-              className={`text-center p-4 rounded-xl backdrop-blur-sm ${
-                timeOfDay === "day" 
-                  ? "bg-white/50 border border-white/50" 
-                  : "bg-blue-900/20 border border-blue-700/20"
+              className={`text-center p-4 rounded-xl backdrop-blur-sm border ${
+                isLight 
+                  ? "bg-white/80 border-gray-200" 
+                  : "bg-blue-900/20 border border-blue-700/30"
               }`}
               whileHover={{ 
                 scale: 1.02,
@@ -83,14 +84,16 @@ const Footer = ({ timeOfDay, lastUpdate }) => {
               <stat.icon 
                 size={24} 
                 className={`mx-auto mb-2 ${
-                  timeOfDay === "day" ? "text-blue-600" : "text-blue-400"
+                  isLight ? "text-blue-600" : "text-blue-400"
                 }`} 
               />
-              <div className="text-2xl font-bold mb-1">
+              <div className={`text-2xl font-bold mb-1 ${
+                isLight ? "text-gray-800" : "text-white"
+              }`}>
                 {stat.value}
               </div>
               <div className={`text-sm ${
-                timeOfDay === "day" ? "text-gray-800" : "text-blue-100/90"
+                isLight ? "text-gray-600" : "text-blue-200"
               }`}>
                 {stat.label}
               </div>
@@ -108,25 +111,25 @@ const Footer = ({ timeOfDay, lastUpdate }) => {
           >
             <div className="flex items-center mb-4">
               <div className={`p-2 rounded-lg mr-3 ${
-                timeOfDay === "day" ? "bg-blue-100" : "bg-blue-900/30"
+                isLight ? "bg-blue-100" : "bg-blue-900/30"
               }`}>
-                <Cloud className={timeOfDay === "day" ? "text-blue-600" : "text-blue-400"} size={24} />
+                <Cloud className={isLight ? "text-blue-600" : "text-blue-400"} size={24} />
               </div>
               <h3 className={`text-xl font-bold ${
-                timeOfDay === "day" ? "text-gray-900" : "text-white"
+                isLight ? "text-gray-900" : "text-white"
               }`}>
                 PakWeather
               </h3>
             </div>
             <p className={`mb-4 ${
-              timeOfDay === "day" ? "text-gray-800" : "text-blue-100/90"
+              isLight ? "text-gray-600" : "text-blue-200"
             }`}>
               Real-time weather monitoring and forecasting for Pakistan. 
               Accurate, reliable, and always up-to-date.
             </p>
             <div className="flex items-center space-x-2 text-sm">
-              <MapPin size={14} className={timeOfDay === "day" ? "text-gray-500" : "text-blue-300"} />
-              <span className={timeOfDay === "day" ? "text-gray-500" : "text-blue-300"}>
+              <MapPin size={14} className={isLight ? "text-gray-500" : "text-blue-300"} />
+              <span className={isLight ? "text-gray-500" : "text-blue-300"}>
                 Serving all major cities in Pakistan
               </span>
             </div>
@@ -139,7 +142,7 @@ const Footer = ({ timeOfDay, lastUpdate }) => {
             transition={{ duration: 0.5, delay: 1.4 }}
           >
             <h4 className={`font-semibold mb-4 ${
-              timeOfDay === "day" ? "text-gray-900" : "text-white"
+              isLight ? "text-gray-900" : "text-white"
             }`}>
               Quick Links
             </h4>
@@ -147,7 +150,7 @@ const Footer = ({ timeOfDay, lastUpdate }) => {
               {['Weather Maps', 'Radar', 'Forecasts', 'Weather News'].map((link) => (
                 <li key={link}>
                   <a href="https://www.msn.com/en-us/weather" className={`inline-flex items-center text-sm transition-colors hover:underline ${
-                    timeOfDay === "day" ? "text-blue-600 hover:text-blue-700" : "text-blue-300 hover:text-blue-200"
+                    isLight ? "text-blue-600 hover:text-blue-700" : "text-blue-300 hover:text-blue-200"
                   }`}>
                     {link}
                     <ExternalLink size={12} className="ml-1" />
@@ -164,7 +167,7 @@ const Footer = ({ timeOfDay, lastUpdate }) => {
             transition={{ duration: 0.5, delay: 1.6 }}
           >
             <h4 className={`font-semibold mb-4 ${
-              timeOfDay === "day" ? "text-gray-900" : "text-white"
+              isLight ? "text-gray-900" : "text-white"
             }`}>
               Connect With Us
             </h4>
@@ -175,10 +178,10 @@ const Footer = ({ timeOfDay, lastUpdate }) => {
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`p-2 rounded-lg transition-all ${
-                    timeOfDay === "day" 
-                      ? "bg-blue-100 text-blue-600 hover:bg-blue-200" 
-                      : "bg-blue-900/30 text-blue-400 hover:bg-blue-800/40"
+                  className={`p-2 rounded-lg transition-all border ${
+                    isLight 
+                      ? "bg-white/80 border-gray-200 text-blue-600 hover:bg-blue-50 hover:border-blue-200" 
+                      : "bg-blue-900/30 border-blue-700/50 text-blue-400 hover:bg-blue-800/40 hover:border-blue-600/50"
                   }`}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
@@ -190,7 +193,7 @@ const Footer = ({ timeOfDay, lastUpdate }) => {
             </div>
             {lastUpdate && (
               <div className={`text-xs ${
-                timeOfDay === "day" ? "text-gray-500" : "text-blue-300/70"
+                isLight ? "text-gray-500" : "text-blue-300"
               }`}>
                 Last updated: {lastUpdate.toLocaleString()}
               </div>
@@ -201,21 +204,21 @@ const Footer = ({ timeOfDay, lastUpdate }) => {
         {/* Bottom Bar */}
         <motion.div 
           className={`pt-6 border-t ${
-            timeOfDay === "day" ? "border-blue-100/50" : "border-blue-700/20"
+            isLight ? "border-gray-200/50" : "border-blue-700/20"
           } flex flex-col md:flex-row justify-between items-center`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 1.8 }}
         >
           <div className={`text-sm mb-2 md:mb-0 ${
-            timeOfDay === "day" ? "text-blue-800" : "text-blue-100/80"
+            isLight ? "text-gray-600" : "text-blue-200"
           }`}>
             © {currentYear} PakWeather. All rights reserved.
           </div>
           
           <div className="flex items-center space-x-4 text-sm">
             <div className={`flex items-center ${
-              timeOfDay === "day" ? "text-gray-800" : "text-blue-100/80"
+              isLight ? "text-gray-600" : "text-blue-200"
             }`}>
               Made By Taha Usman
               <motion.span
@@ -228,8 +231,8 @@ const Footer = ({ timeOfDay, lastUpdate }) => {
             </div>
             
             <div className="flex items-center space-x-2">
-              <Shield size={12} className={timeOfDay === "day" ? "text-green-600" : "text-green-400"} />
-              <span className={timeOfDay === "day" ? "text-gray-500" : "text-blue-300/70"}>
+              <Shield size={12} className={isLight ? "text-green-600" : "text-green-400"} />
+              <span className={isLight ? "text-gray-500" : "text-blue-300"}>
                 Secure & Reliable
               </span>
             </div>
@@ -240,9 +243,9 @@ const Footer = ({ timeOfDay, lastUpdate }) => {
       {/* Decorative Element */}
       <motion.div
         className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-32 h-1 ${
-          timeOfDay === "day" 
+          isLight 
             ? "bg-gradient-to-r from-transparent via-blue-400 to-transparent" 
-            : "bg-gradient-to-r from-transparent via-blue-600 to-transparent"
+            : "bg-gradient-to-r from-transparent via-blue-500 to-transparent"
         }`}
         initial={{ width: 0 }}
         animate={{ width: '8rem' }}

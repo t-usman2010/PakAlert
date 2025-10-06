@@ -7,32 +7,32 @@ import ForecastChart from '../components/ForecastChart';
 import { Cloud, CloudRain, Sun, Loader, AlertTriangle, RefreshCw } from 'lucide-react';
 
 // Enhanced Skeleton components with improved contrast
-const WeatherCardSkeleton = ({ timeOfDay }) => (
-  <div className={`rounded-2xl p-6 shadow-lg ${
-    timeOfDay === "night" 
-      ? "bg-blue-900/20 border border-blue-700/30" 
-      : "bg-white border border-gray-200"
+const WeatherCardSkeleton = ({ theme }) => (
+  <div className={`rounded-2xl p-6 shadow-lg border ${
+    theme === "dark" 
+      ? "bg-slate-800/60 border-slate-600/50" 
+      : "bg-white/95 border-slate-200"
   }`}>
     <div className="animate-pulse">
       <div className={`h-7 rounded-full mb-4 ${
-        timeOfDay === "night" ? "bg-blue-700/30" : "bg-gray-300"
+        theme === "dark" ? "bg-slate-700" : "bg-slate-300"
       }`} style={{ width: '60%' }}></div>
       <div className={`h-12 rounded-full mb-6 ${
-        timeOfDay === "night" ? "bg-blue-700/30" : "bg-gray-300"
+        theme === "dark" ? "bg-slate-700" : "bg-slate-300"
       }`} style={{ width: '40%' }}></div>
       <div className="flex items-center justify-between">
         <div className={`h-20 w-20 rounded-full ${
-          timeOfDay === "night" ? "bg-blue-700/30" : "bg-gray-300"
+          theme === "dark" ? "bg-slate-700" : "bg-slate-300"
         }`}></div>
         <div className="space-y-2">
           <div className={`h-4 rounded-full ${
-            timeOfDay === "night" ? "bg-blue-700/30" : "bg-gray-300"
+            theme === "dark" ? "bg-slate-700" : "bg-slate-300"
           }`} style={{ width: '80px' }}></div>
           <div className={`h-4 rounded-full ${
-            timeOfDay === "night" ? "bg-blue-700/30" : "bg-gray-300"
+            theme === "dark" ? "bg-slate-700" : "bg-slate-300"
           }`} style={{ width: '60px' }}></div>
           <div className={`h-4 rounded-full ${
-            timeOfDay === "night" ? "bg-blue-700/30" : "bg-gray-300"
+            theme === "dark" ? "bg-slate-700" : "bg-slate-300"
           }`} style={{ width: '70px' }}></div>
         </div>
       </div>
@@ -40,27 +40,27 @@ const WeatherCardSkeleton = ({ timeOfDay }) => (
   </div>
 );
 
-const ForecastSkeleton = ({ timeOfDay }) => (
-  <div className={`rounded-2xl p-6 shadow-lg ${
-    timeOfDay === "night" 
-      ? "bg-blue-900/20 border border-blue-700/30" 
-      : "bg-white border border-gray-200"
+const ForecastSkeleton = ({ theme }) => (
+  <div className={`rounded-2xl p-6 shadow-lg border ${
+    theme === "dark" 
+      ? "bg-slate-800/60 border-slate-600/50" 
+      : "bg-white/95 border-slate-200"
   }`}>
     <div className="animate-pulse">
       <div className={`h-6 rounded-full mb-6 ${
-        timeOfDay === "night" ? "bg-blue-700/30" : "bg-gray-300"
+        theme === "dark" ? "bg-slate-700" : "bg-slate-300"
       }`} style={{ width: '40%' }}></div>
       <div className="flex justify-between">
         {[1, 2, 3, 4, 5].map(item => (
           <div key={item} className="text-center space-y-2">
             <div className={`h-3 rounded-full ${
-              timeOfDay === "night" ? "bg-blue-700/30" : "bg-gray-300"
+              theme === "dark" ? "bg-slate-700" : "bg-slate-300"
             }`} style={{ width: '30px' }}></div>
             <div className={`h-10 w-10 rounded-full mx-auto ${
-              timeOfDay === "night" ? "bg-blue-700/30" : "bg-gray-300"
+              theme === "dark" ? "bg-slate-700" : "bg-slate-300"
             }`}></div>
             <div className={`h-3 rounded-full ${
-              timeOfDay === "night" ? "bg-blue-700/30" : "bg-gray-300"
+              theme === "dark" ? "bg-slate-700" : "bg-slate-300"
             }`} style={{ width: '25px' }}></div>
           </div>
         ))}
@@ -69,29 +69,29 @@ const ForecastSkeleton = ({ timeOfDay }) => (
   </div>
 );
 
-const AlertsSkeleton = ({ timeOfDay }) => (
-  <div className={`rounded-2xl p-6 shadow-lg ${
-    timeOfDay === "night" 
-      ? "bg-blue-900/20 border border-blue-700/30" 
-      : "bg-white border border-gray-200"
+const AlertsSkeleton = ({ theme }) => (
+  <div className={`rounded-2xl p-6 shadow-lg border ${
+    theme === "dark" 
+      ? "bg-slate-800/60 border-slate-600/50" 
+      : "bg-white/95 border-slate-200"
   }`}>
     <div className="animate-pulse">
       <div className={`h-6 rounded-full mb-6 ${
-        timeOfDay === "night" ? "bg-blue-700/30" : "bg-gray-300"
+        theme === "dark" ? "bg-slate-700" : "bg-slate-300"
       }`} style={{ width: '50%' }}></div>
       <div className="space-y-4">
         {[1, 2, 3].map(item => (
           <div key={item} className={`p-4 rounded-xl ${
-            timeOfDay === "night" ? "bg-blue-800/20" : "bg-gray-100"
+            theme === "dark" ? "bg-slate-700/30" : "bg-slate-100"
           }`}>
             <div className={`h-4 rounded-full mb-2 ${
-              timeOfDay === "night" ? "bg-blue-700/30" : "bg-gray-300"
+              theme === "dark" ? "bg-slate-600" : "bg-slate-300"
             }`} style={{ width: '70%' }}></div>
             <div className={`h-3 rounded-full mb-1 ${
-              timeOfDay === "night" ? "bg-blue-700/30" : "bg-gray-300"
+              theme === "dark" ? "bg-slate-600" : "bg-slate-300"
             }`} style={{ width: '90%' }}></div>
             <div className={`h-3 rounded-full ${
-              timeOfDay === "night" ? "bg-blue-700/30" : "bg-gray-300"
+              theme === "dark" ? "bg-slate-600" : "bg-slate-300"
             }`} style={{ width: '60%' }}></div>
           </div>
         ))}
@@ -100,37 +100,37 @@ const AlertsSkeleton = ({ timeOfDay }) => (
   </div>
 );
 
-const ErrorState = ({ message, timeOfDay, onRetry }) => (
+const ErrorState = ({ message, theme, onRetry }) => (
   <motion.div 
-    className={`rounded-2xl p-8 text-center ${
-      timeOfDay === "night" 
-        ? "bg-red-900/20 border border-red-700/30" 
-        : "bg-red-50 border border-red-200"
-    } shadow-lg`}
+    className={`rounded-2xl p-8 text-center border shadow-lg ${
+      theme === "dark" 
+        ? "bg-red-900/30 border-red-700/50" 
+        : "bg-red-50/95 border-red-200"
+    }`}
     initial={{ opacity: 0, scale: 0.95 }}
     animate={{ opacity: 1, scale: 1 }}
   >
     <AlertTriangle className={`mx-auto mb-4 ${
-      timeOfDay === "night" ? "text-red-400" : "text-red-500"
+      theme === "dark" ? "text-red-400" : "text-red-500"
     }`} size={48} />
     <p className={`text-lg font-medium mb-2 ${
-      timeOfDay === "night" ? "text-red-100" : "text-red-700"
+      theme === "dark" ? "text-red-100" : "text-red-800"
     }`}>
       Unable to load data
     </p>
     <p className={`mb-4 ${
-      timeOfDay === "night" ? "text-red-200" : "text-red-600"
+      theme === "dark" ? "text-red-200" : "text-red-700"
     }`}>
       {message}
     </p>
     {onRetry && (
       <button
         onClick={onRetry}
-        className={`inline-flex items-center px-4 py-2 rounded-lg font-medium ${
-          timeOfDay === "night" 
-            ? "bg-red-600/30 text-red-100 hover:bg-red-600/40" 
-            : "bg-red-100 text-red-700 hover:bg-red-200"
-        } transition-colors`}
+        className={`inline-flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${
+          theme === "dark" 
+            ? "bg-red-600/30 text-red-100 hover:bg-red-600/40 border border-red-600/30" 
+            : "bg-red-100 text-red-800 hover:bg-red-200 border border-red-200"
+        }`}
       >
         <RefreshCw size={16} className="mr-2" />
         Try Again
@@ -139,24 +139,24 @@ const ErrorState = ({ message, timeOfDay, onRetry }) => (
   </motion.div>
 );
 
-const EmptyState = ({ timeOfDay, type }) => {
+const EmptyState = ({ theme, type }) => {
   const getEmptyConfig = (type) => {
     switch (type) {
       case 'weather':
         return {
-          icon: <Cloud className={timeOfDay === "night" ? "text-blue-300" : "text-blue-500"} size={48} />,
+          icon: <Cloud className={theme === "dark" ? "text-blue-400" : "text-slate-600"} size={48} />,
           title: "No Weather Data",
           description: "Search for a city to see current weather conditions"
         };
       case 'forecast':
         return {
-          icon: <CloudRain className={timeOfDay === "night" ? "text-blue-300" : "text-blue-500"} size={48} />,
+          icon: <CloudRain className={theme === "dark" ? "text-blue-400" : "text-slate-600"} size={48} />,
           title: "No Forecast Available",
           description: "Weather forecast will appear here once a city is selected"
         };
       case 'alerts':
         return {
-          icon: <Sun className={timeOfDay === "night" ? "text-yellow-300" : "text-yellow-500"} size={48} />,
+          icon: <Sun className={theme === "dark" ? "text-amber-400" : "text-amber-600"} size={48} />,
           title: "No Active Alerts",
           description: "Great! There are no weather alerts for this area"
         };
@@ -173,21 +173,21 @@ const EmptyState = ({ timeOfDay, type }) => {
 
   return (
     <motion.div 
-      className={`rounded-2xl p-8 text-center ${
-        timeOfDay === "night" 
-          ? "bg-blue-900/20 border border-blue-700/30" 
-          : "bg-white border border-gray-200"
-      } shadow-lg`}
+      className={`rounded-2xl p-8 text-center border shadow-lg ${
+        theme === "dark" 
+          ? "bg-slate-800/60 border-slate-600/50" 
+          : "bg-white/95 border-slate-200"
+      }`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
       <div className="mb-4">{config.icon}</div>
       <h3 className={`text-lg font-medium mb-2 ${
-        timeOfDay === "night" ? "text-white" : "text-gray-800"
+        theme === "dark" ? "text-white" : "text-slate-800"
       }`}>
         {config.title}
       </h3>
-      <p className={timeOfDay === "night" ? "text-blue-100" : "text-gray-600"}>
+      <p className={theme === "dark" ? "text-slate-300" : "text-slate-600"}>
         {config.description}
       </p>
     </motion.div>
@@ -200,13 +200,12 @@ const HomePage = ({
   weather,
   forecast,
   alerts,
+  reports,
   loadingWeather,
   loadingForecast,
-  loadingAlerts,
   errorWeather,
   errorForecast,
-  errorAlerts,
-  timeOfDay,
+  theme,
   onRetry
 }) => {
   return (
@@ -220,12 +219,12 @@ const HomePage = ({
           className="text-center mb-8"
         >
           <h1 className={`text-4xl font-bold mb-4 ${
-            timeOfDay === "night" ? "text-white" : "text-gray-900"
+            theme === "dark" ? "text-white" : "text-slate-800"
           }`}>
             Weather Dashboard
           </h1>
           <p className={`text-lg ${
-            timeOfDay === "night" ? "text-blue-100" : "text-gray-600"
+            theme === "dark" ? "text-slate-300" : "text-slate-600"
           }`}>
             Real-time weather data and forecasts for any location
           </p>
@@ -238,7 +237,7 @@ const HomePage = ({
           transition={{ duration: 0.5, delay: 0.3 }}
           className="mb-12"
         >
-          <CitySearch onSearch={setCity} timeOfDay={timeOfDay} />
+          <CitySearch onSearch={setCity} theme={theme} />
         </motion.div>
 
         {/* Main Content Grid */}
@@ -251,17 +250,17 @@ const HomePage = ({
             transition={{ duration: 0.5, delay: 0.4 }}
           >
             {loadingWeather ? (
-              <WeatherCardSkeleton timeOfDay={timeOfDay} />
+              <WeatherCardSkeleton theme={theme} />
             ) : errorWeather ? (
               <ErrorState 
                 message={errorWeather} 
-                timeOfDay={timeOfDay} 
+                theme={theme} 
                 onRetry={onRetry}
               />
             ) : weather ? (
-              <WeatherCard city={city} data={weather} timeOfDay={timeOfDay} />
+              <WeatherCard city={city} data={weather} theme={theme} />
             ) : (
-              <EmptyState timeOfDay={timeOfDay} type="weather" />
+              <EmptyState theme={theme} type="weather" />
             )}
           </motion.div>
 
@@ -273,17 +272,17 @@ const HomePage = ({
             transition={{ duration: 0.5, delay: 0.6 }}
           >
             {loadingForecast ? (
-              <ForecastSkeleton timeOfDay={timeOfDay} />
+              <ForecastSkeleton theme={theme} />
             ) : errorForecast ? (
               <ErrorState 
                 message={errorForecast} 
-                timeOfDay={timeOfDay} 
+                theme={theme} 
                 onRetry={onRetry}
               />
             ) : forecast && forecast.length > 0 ? (
-              <ForecastChart data={forecast} timeOfDay={timeOfDay} />
+              <ForecastChart data={forecast} theme={theme} />
             ) : (
-              <EmptyState timeOfDay={timeOfDay} type="forecast" />
+              <EmptyState theme={theme} type="forecast" />
             )}
           </motion.div>
         </div>
@@ -295,18 +294,10 @@ const HomePage = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.8 }}
         >
-          {loadingAlerts ? (
-            <AlertsSkeleton timeOfDay={timeOfDay} />
-          ) : errorAlerts ? (
-            <ErrorState 
-              message={errorAlerts} 
-              timeOfDay={timeOfDay} 
-              onRetry={onRetry}
-            />
-          ) : alerts && alerts.length > 0 ? (
-            <AlertsFeed alerts={alerts} timeOfDay={timeOfDay} />
+          {alerts && alerts.length > 0 ? (
+            <AlertsFeed alerts={alerts} theme={theme} />
           ) : (
-            <EmptyState timeOfDay={timeOfDay} type="alerts" />
+            <EmptyState theme={theme} type="alerts" />
           )}
         </motion.div>
       </div>

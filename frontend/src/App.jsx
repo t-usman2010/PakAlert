@@ -9,8 +9,8 @@ import Footer from "./components/layout/Footer";
 import HomePage from "./pages/HomePage";
 import ReportsPage from "./pages/ReportsPage";
 
-// Enhanced Background Component with better readability
-const AnimatedBackground = ({ timeOfDay }) => {
+// Enhanced Background Component with better contrast
+const AnimatedBackground = ({ theme }) => {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -19,48 +19,53 @@ const AnimatedBackground = ({ timeOfDay }) => {
 
   if (!mounted) return null;
 
-  const dayElements = [
-    { icon: Sun, size: 120, top: "5%", left: "10%", delay: 0, color: "text-yellow-300/10" },
-    { icon: Cloud, size: 80, top: "15%", left: "80%", delay: 0.3, color: "text-blue-300/5" },
-    { icon: Cloud, size: 100, top: "70%", left: "5%", delay: 0.6, color: "text-blue-200/5" },
-    { icon: CloudRain, size: 60, top: "85%", left: "75%", delay: 0.9, color: "text-blue-400/8" }
+  const lightElements = [
+    { icon: Sun, size: 120, top: "5%", left: "10%", delay: 0, color: "text-amber-500/20" },
+    { icon: Cloud, size: 80, top: "15%", left: "80%", delay: 0.3, color: "text-slate-500/15" },
+    { icon: Cloud, size: 100, top: "70%", left: "5%", delay: 0.6, color: "text-slate-400/15" },
+    { icon: CloudRain, size: 60, top: "85%", left: "75%", delay: 0.9, color: "text-blue-500/15" }
   ];
 
-  const nightElements = [
-    { icon: Moon, size: 100, top: "8%", left: "85%", delay: 0, color: "text-blue-200/5" },
-    { icon: Star, size: 20, top: "20%", left: "15%", delay: 0.1, color: "text-white/10" },
-    { icon: Star, size: 15, top: "30%", left: "90%", delay: 0.2, color: "text-white/15" },
-    { icon: Star, size: 25, top: "60%", left: "10%", delay: 0.3, color: "text-white/8" },
-    { icon: Star, size: 18, top: "75%", left: "80%", delay: 0.4, color: "text-white/12" },
-    { icon: Cloud, size: 70, top: "40%", left: "70%", delay: 0.5, color: "text-blue-400/5" }
+  const darkElements = [
+    { icon: Moon, size: 100, top: "8%", left: "85%", delay: 0, color: "text-slate-200/10" },
+    { icon: Star, size: 20, top: "20%", left: "15%", delay: 0.1, color: "text-blue-100/20" },
+    { icon: Star, size: 15, top: "30%", left: "90%", delay: 0.2, color: "text-blue-100/25" },
+    { icon: Star, size: 25, top: "60%", left: "10%", delay: 0.3, color: "text-blue-100/15" },
+    { icon: Star, size: 18, top: "75%", left: "80%", delay: 0.4, color: "text-blue-100/22" },
+    { icon: Cloud, size: 70, top: "40%", left: "70%", delay: 0.5, color: "text-blue-400/8" }
   ];
 
-  const elements = timeOfDay === "day" ? dayElements : nightElements;
+  const elements = theme === "light" ? lightElements : darkElements;
 
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-      {/* Simplified background with better contrast */}
+      {/* Darker gradients for better contrast in light theme */}
       <div className={`absolute inset-0 transition-all duration-2000 ${
-        timeOfDay === "day" 
-          ? "bg-gradient-to-br from-blue-50 via-cyan-50 to-white" 
-          : "bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900"
+        theme === "light" 
+          ? "bg-gradient-to-br from-slate-100 via-blue-100 to-slate-50" 
+          : "bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900"
       }`} />
       
-      {/* Subtle animated elements */}
+      {/* Subtle texture overlay for light theme */}
+      {theme === "light" && (
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-200/10 via-transparent to-transparent" />
+      )}
+      
+      {/* Animated elements */}
       <AnimatePresence mode="wait">
         {elements.map((element, index) => (
           <motion.div
-            key={`${timeOfDay}-${index}`}
+            key={`${theme}-${index}`}
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ 
               opacity: 1, 
               scale: 1,
               y: [0, -10, 0],
-              rotate: timeOfDay === "day" ? [0, 2, 0] : 0
+              rotate: theme === "light" ? [0, 2, 0] : 0
             }}
             exit={{ opacity: 0, scale: 0.5 }}
             transition={{ 
-              duration: timeOfDay === "day" ? 12 : 20,
+              duration: theme === "light" ? 12 : 20,
               delay: element.delay,
               repeat: Infinity,
               repeatType: "reverse",
@@ -77,42 +82,58 @@ const AnimatedBackground = ({ timeOfDay }) => {
         ))}
       </AnimatePresence>
 
-      {/* Very subtle gradient orbs */}
-      {timeOfDay === "day" ? (
+      {/* Enhanced gradient orbs */}
+      {theme === "light" ? (
         <>
           <motion.div
             animate={{ 
               opacity: [0.1, 0.15, 0.1],
               scale: [1, 1.05, 1]
             }}
-            transition={{ duration: 10, repeat: Infinity }}
-            className="absolute top-10 left-1/4 w-32 h-32 bg-yellow-200/10 rounded-full filter blur-3xl"
+            transition={{ duration: 8, repeat: Infinity }}
+            className="absolute top-10 left-1/4 w-40 h-40 bg-amber-300/15 rounded-full filter blur-3xl"
           />
           <motion.div
             animate={{ 
-              opacity: [0.05, 0.1, 0.05],
+              opacity: [0.08, 0.12, 0.08],
               scale: [1, 1.1, 1]
             }}
-            transition={{ duration: 8, repeat: Infinity, delay: 3 }}
-            className="absolute bottom-20 right-1/4 w-48 h-48 bg-blue-200/5 rounded-full filter blur-3xl"
+            transition={{ duration: 6, repeat: Infinity, delay: 2 }}
+            className="absolute bottom-20 right-1/4 w-52 h-52 bg-blue-300/10 rounded-full filter blur-3xl"
+          />
+          <motion.div
+            animate={{ 
+              opacity: [0.05, 0.08, 0.05],
+              scale: [0.8, 1, 0.8]
+            }}
+            transition={{ duration: 10, repeat: Infinity, delay: 1 }}
+            className="absolute top-1/2 left-1/2 w-60 h-60 bg-slate-300/5 rounded-full filter blur-3xl"
           />
         </>
       ) : (
         <>
           <motion.div
-            animate={{ opacity: [0.02, 0.05, 0.02] }}
-            transition={{ duration: 6, repeat: Infinity }}
-            className="absolute top-20 right-20 w-3 h-3 bg-white/10 rounded-full"
-          />
-          <motion.div
             animate={{ opacity: [0.03, 0.06, 0.03] }}
-            transition={{ duration: 5, repeat: Infinity, delay: 1 }}
-            className="absolute top-32 left-32 w-2 h-2 bg-white/8 rounded-full"
+            transition={{ duration: 6, repeat: Infinity }}
+            className="absolute top-20 right-20 w-4 h-4 bg-blue-200/15 rounded-full filter blur-sm"
           />
           <motion.div
-            animate={{ opacity: [0.04, 0.07, 0.04] }}
+            animate={{ opacity: [0.04, 0.08, 0.04] }}
+            transition={{ duration: 5, repeat: Infinity, delay: 1 }}
+            className="absolute top-32 left-32 w-3 h-3 bg-blue-100/12 rounded-full filter blur-sm"
+          />
+          <motion.div
+            animate={{ opacity: [0.05, 0.09, 0.05] }}
             transition={{ duration: 7, repeat: Infinity, delay: 2 }}
-            className="absolute bottom-40 right-40 w-2 h-2 bg-white/6 rounded-full"
+            className="absolute bottom-40 right-40 w-3 h-3 bg-indigo-200/10 rounded-full filter blur-sm"
+          />
+          <motion.div
+            animate={{ 
+              opacity: [0.02, 0.04, 0.02],
+              scale: [1, 1.2, 1]
+            }}
+            transition={{ duration: 15, repeat: Infinity }}
+            className="absolute bottom-10 left-20 w-80 h-80 bg-indigo-500/5 rounded-full filter blur-3xl"
           />
         </>
       )}
@@ -121,26 +142,35 @@ const AnimatedBackground = ({ timeOfDay }) => {
 };
 
 // Loading Screen Component
-const LoadingScreen = ({ timeOfDay }) => (
+const LoadingScreen = ({ theme }) => (
   <motion.div
     initial={{ opacity: 1 }}
     exit={{ opacity: 0 }}
     className={`fixed inset-0 z-50 flex items-center justify-center ${
-      timeOfDay === "day" 
-        ? "bg-gradient-to-br from-blue-50 to-cyan-50" 
-        : "bg-gradient-to-br from-gray-900 to-blue-900"
+      theme === "light" 
+        ? "bg-gradient-to-br from-slate-100 via-blue-100 to-slate-50" 
+        : "bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900"
     }`}
   >
     <motion.div
       animate={{ rotate: 360, scale: [1, 1.1, 1] }}
       transition={{ rotate: { duration: 2, repeat: Infinity, ease: "linear" }, scale: { duration: 1.5, repeat: Infinity } }}
-      className={`p-6 rounded-2xl ${
-        timeOfDay === "day" 
-          ? "bg-white/90 backdrop-blur-sm shadow-lg" 
-          : "bg-blue-900/50 backdrop-blur-sm shadow-lg"
+      className={`p-8 rounded-2xl backdrop-blur-sm border ${
+        theme === "light" 
+          ? "bg-white/95 border-slate-300 shadow-2xl" 
+          : "bg-slate-800/60 border-blue-700/30 shadow-2xl"
       }`}
     >
-      <Loader size={48} className={timeOfDay === "day" ? "text-blue-600" : "text-blue-300"} />
+      <div className="flex flex-col items-center space-y-4">
+        <Loader size={48} className={theme === "light" ? "text-slate-700" : "text-blue-400"} />
+        <motion.p
+          animate={{ opacity: [0.6, 1, 0.6] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className={`font-medium ${theme === "light" ? "text-slate-800" : "text-slate-200"}`}
+        >
+          Loading Weather...
+        </motion.p>
+      </div>
     </motion.div>
   </motion.div>
 );
@@ -156,23 +186,28 @@ export default function App() {
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [errorWeather, setErrorWeather] = useState(null);
   const [errorForecast, setErrorForecast] = useState(null);
-  const [timeOfDay, setTimeOfDay] = useState("day");
+  const [theme, setTheme] = useState("light");
   const [lastUpdate, setLastUpdate] = useState(null);
   const socket = useSocket();
   const location = useLocation();
 
-  // Enhanced time of day detection with smooth transitions
+  // System theme detection with media query
   useEffect(() => {
-    const updateTimeOfDay = () => {
-      const hour = new Date().getHours();
-      const newTimeOfDay = (hour >= 6 && hour < 18) ? "day" : "night";
-      setTimeOfDay(newTimeOfDay);
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    // Set initial theme based on system preference
+    setTheme(mediaQuery.matches ? 'dark' : 'light');
+
+    // Listen for system theme changes
+    const handleThemeChange = (e) => {
+      setTheme(e.matches ? 'dark' : 'light');
     };
 
-    updateTimeOfDay();
-    const interval = setInterval(updateTimeOfDay, 60000); // Update every minute
-
-    return () => clearInterval(interval);
+    mediaQuery.addEventListener('change', handleThemeChange);
+    
+    return () => {
+      mediaQuery.removeEventListener('change', handleThemeChange);
+    };
   }, []);
 
   // Enhanced data fetching with retry mechanism
@@ -282,16 +317,16 @@ export default function App() {
   };
 
   if (loadingInitial) {
-    return <LoadingScreen timeOfDay={timeOfDay} />;
+    return <LoadingScreen theme={theme} />;
   }
 
   return (
     <div className={`min-h-screen transition-colors duration-1000 ${
-      timeOfDay === "day" 
-        ? "text-gray-900" 
-        : "text-white"
+      theme === "light" 
+        ? "text-slate-800 bg-transparent" 
+        : "text-white bg-transparent"
     }`}>
-      <AnimatedBackground timeOfDay={timeOfDay} />
+      <AnimatedBackground theme={theme} />
       
       {/* Refresh Indicator */}
       {lastUpdate && (
@@ -303,25 +338,25 @@ export default function App() {
           <button
             onClick={handleRefresh}
             disabled={loadingWeather || loadingForecast}
-            className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-medium backdrop-blur-sm border ${
-              timeOfDay === "day"
-                ? "bg-white/90 border-gray-200 text-gray-700 hover:bg-white shadow-lg"
-                : "bg-blue-900/70 border-blue-700/50 text-blue-100 hover:bg-blue-900/80 shadow-lg"
-            } transition-all duration-200 disabled:opacity-50`}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-full font-medium backdrop-blur-sm border transition-all duration-300 ${
+              theme === "light"
+                ? "bg-white/95 border-slate-300 text-slate-800 hover:bg-white shadow-lg hover:shadow-xl hover:scale-105"
+                : "bg-slate-800/80 border-slate-600/50 text-slate-200 hover:bg-slate-800/90 shadow-lg hover:shadow-xl hover:scale-105"
+            } disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100`}
           >
             {loadingWeather || loadingForecast ? (
               <Loader size={16} className="animate-spin" />
             ) : (
               <RefreshCw size={16} />
             )}
-            <span>
+            <span className="text-sm">
               {lastUpdate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
           </button>
         </motion.div>
       )}
 
-      <Header timeOfDay={timeOfDay} />
+      <Header theme={theme} />
       
       <div className="max-w-7xl mx-auto relative z-10 px-4 sm:px-6 lg:px-8 py-8">
         <AnimatePresence mode="wait">
@@ -348,7 +383,7 @@ export default function App() {
                     loadingForecast={loadingForecast}
                     errorWeather={errorWeather}
                     errorForecast={errorForecast}
-                    timeOfDay={timeOfDay}
+                    theme={theme}
                     onRetry={handleRefresh}
                   />
                 }
@@ -357,7 +392,7 @@ export default function App() {
                 path="/reports" 
                 element={
                   <ReportsPage 
-                    timeOfDay={timeOfDay} 
+                    theme={theme} 
                     reports={reports}
                     onReportSubmit={() => getReports().then(setReports)}
                   />
@@ -368,7 +403,7 @@ export default function App() {
         </AnimatePresence>
       </div>
 
-      <Footer timeOfDay={timeOfDay} lastUpdate={lastUpdate} />
+      <Footer theme={theme} lastUpdate={lastUpdate} />
     </div>
   );
 }
