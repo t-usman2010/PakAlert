@@ -14,6 +14,7 @@ import {
   Thermometer,
   Droplets
 } from 'lucide-react';
+import { Bell } from 'lucide-react';
 
 const Header = ({ theme }) => {
   const location = useLocation();
@@ -25,6 +26,12 @@ const Header = ({ theme }) => {
       name: "Dashboard",
       icon: Home,
       description: "Weather overview"
+    },
+    {
+      path: "/alerts",
+      name: "Alerts",
+      icon: Bell,
+      description: "Weather alerts"
     },
     {
       path: "/reports",

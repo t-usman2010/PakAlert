@@ -2,7 +2,6 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CitySearch from '../components/CitySearch';
 import WeatherCard from '../components/WeatherCard';
-import AlertsFeed from '../components/AlertsFeed';
 import ForecastChart from '../components/ForecastChart';
 import { Cloud, CloudRain, Sun, Loader, AlertTriangle, RefreshCw } from 'lucide-react';
 
@@ -287,19 +286,7 @@ const HomePage = ({
           </motion.div>
         </div>
 
-        {/* Alerts Section */}
-        <motion.div 
-          className="mt-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.8 }}
-        >
-          {alerts && alerts.length > 0 ? (
-            <AlertsFeed alerts={alerts} theme={theme} />
-          ) : (
-            <EmptyState theme={theme} type="alerts" />
-          )}
-        </motion.div>
+        {/* Alerts moved to separate page */}
       </div>
     </div>
   );

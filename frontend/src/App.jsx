@@ -8,6 +8,7 @@ import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import HomePage from "./pages/HomePage";
 import ReportsPage from "./pages/ReportsPage";
+import AlertsPage from "./pages/AlertsPage";
 
 // Enhanced Background Component with better contrast
 const AnimatedBackground = ({ theme }) => {
@@ -395,6 +396,15 @@ export default function App() {
                     theme={theme} 
                     reports={reports}
                     onReportSubmit={() => getReports().then(setReports)}
+                  />
+                }
+              />
+              <Route
+                path="/alerts"
+                element={
+                  <AlertsPage
+                    theme={theme}
+                    alerts={alerts}
                   />
                 }
               />
