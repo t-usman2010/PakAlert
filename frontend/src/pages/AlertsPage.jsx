@@ -15,7 +15,7 @@ const Heading = ({ title, subtitle, count = 0, theme = 'light' }) => {
         className="inline-flex items-center space-x-3"
       >
         <div className={`p-3 rounded-2xl shadow-md ${isLight ? 'bg-red-50' : 'bg-red-900/20'}`}>
-          <Bell className={isLight ? 'text-red-600' : 'text-red-300'} size={28} />
+          <Bell className={isLight ? 'text-red-600' : 'text-red-300'} size={40} />
         </div>
         <div>
           <h1 className={`text-6xl sm:text-4xl font-extrabold tracking-tight mb-1 ${
@@ -26,7 +26,7 @@ const Heading = ({ title, subtitle, count = 0, theme = 'light' }) => {
             {title}
           </h1>
           <div className="flex items-center justify-center space-x-3">
-            <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>{subtitle}</p>
+            <p className={`text-l ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>{subtitle}</p>
             <div className={`text-2xs font-semibold px-2 py-1 rounded-full ${
               isLight ? 'bg-white/80 text-red-700 border border-red-100' : 'bg-red-800/40 text-red-100 border border-red-700/30'
             }`}>
