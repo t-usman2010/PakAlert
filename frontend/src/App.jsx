@@ -2,7 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sun, Moon, Cloud, CloudRain, CloudSnow, Star, Loader, RefreshCw } from "lucide-react";
-import { getAlerts, getReports, getWeather, getForecast } from "./services/api";
+import {
+  getAlerts,
+  getReports,
+  getWeather,
+  getForecast,
+  getOneCall,
+  getAirPollution,
+  createReport
+} from "./services/api";
 import useSocket from "./hooks/useSocket";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
@@ -180,6 +188,8 @@ export default function App() {
   const [city, setCity] = useState("Islamabad");
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
+  const [oneCall, setOneCall] = useState(null); // OneCall data (hourly/daily/alerts)
+  const [airQuality, setAirQuality] = useState(null); // Air pollution data
   const [alerts, setAlerts] = useState([]);
   const [reports, setReports] = useState([]);
   const [loadingWeather, setLoadingWeather] = useState(true);
@@ -211,19 +221,23 @@ export default function App() {
     };
   }, []);
 
-  // Enhanced data fetching with retry mechanism
+  // Enhanced data fetching with retry mechanism (now includes OneCall + AirQuality)
   const fetchWeatherData = async (retryCount = 0) => {
     setLoadingWeather(true);
     setLoadingForecast(true);
     
     try {
-      const [weatherData, forecastData] = await Promise.all([
+      const [weatherData, forecastData, oneCallData, airData] = await Promise.all([
         getWeather(city),
         getForecast(city),
+        getOneCall(city).catch((err) => { console.warn("OneCall fetch failed:", err); return null; }),
+        getAirPollution(city).catch((err) => { console.warn("AirPollution fetch failed:", err); return null; })
       ]);
       
       setWeather(weatherData);
       setForecast(forecastData);
+      setOneCall(oneCallData);
+      setAirQuality(airData);
       setErrorWeather(null);
       setErrorForecast(null);
       setLastUpdate(new Date());
@@ -249,8 +263,8 @@ export default function App() {
       try {
         await Promise.all([
           fetchWeatherData(),
-          getAlerts().then(setAlerts),
-          getReports().then(setReports)
+          getAlerts().then((a) => setAlerts(Array.isArray(a) ? a : (a || []))),
+          getReports().then((r) => setReports(Array.isArray(r) ? r : (r || [])))
         ]);
       } catch (err) {
         console.error("Initial data load error:", err);
@@ -299,9 +313,75 @@ export default function App() {
     };
   }, [socket, city]);
 
+  // API-backed alert/report handlers (client-side state + server)
+  const refreshAlerts = async () => {
+    try {
+      const a = await getAlerts();
+      setAlerts(Array.isArray(a) ? a : (a || []));
+    } catch (err) {
+      console.warn("Failed to refresh alerts:", err);
+    }
+  };
+
+  const refreshReports = async () => {
+    try {
+      const r = await getReports();
+      setReports(Array.isArray(r) ? r : (r || []));
+    } catch (err) {
+      console.warn("Failed to refresh reports:", err);
+    }
+  };
+
+  const handleCreateAlert = async (alertObj) => {
+    try {
+      const created = await createAlert(alertObj);
+      // server returns alert object; prepend
+      setAlerts(prev => [created, ...prev]);
+      return created;
+    } catch (err) {
+      console.error("Create alert failed:", err);
+      throw err;
+    }
+  };
+
+  const handleUpdateAlert = async (id, updateObj) => {
+    try {
+      const updated = await updateAlert(id, updateObj);
+      setAlerts(prev => prev.map(a => a._id === updated._id ? updated : a));
+      return updated;
+    } catch (err) {
+      console.error("Update alert failed:", err);
+      throw err;
+    }
+  };
+
+  const handleDeleteAlert = async (id) => {
+    try {
+      await deleteAlert(id);
+      setAlerts(prev => prev.filter(a => a._id !== id));
+      return true;
+    } catch (err) {
+      console.error("Delete alert failed:", err);
+      throw err;
+    }
+  };
+
+  const handleCreateReport = async (reportObj) => {
+    try {
+      const created = await createReport(reportObj);
+      setReports(prev => [created, ...prev]);
+      return created;
+    } catch (err) {
+      console.error("Create report failed:", err);
+      throw err;
+    }
+  };
+
   // Manual refresh function
   const handleRefresh = () => {
     fetchWeatherData();
+    refreshAlerts();
+    refreshReports();
   };
 
   // Page transition variants
@@ -378,6 +458,8 @@ export default function App() {
                     setCity={setCity}
                     weather={weather}
                     forecast={forecast}
+                    oneCall={oneCall}
+                    airQuality={airQuality}
                     alerts={alerts}
                     reports={reports}
                     loadingWeather={loadingWeather}
@@ -395,7 +477,8 @@ export default function App() {
                   <ReportsPage 
                     theme={theme} 
                     reports={reports}
-                    onReportSubmit={() => getReports().then(setReports)}
+                    onReportSubmit={() => refreshReports()}
+                    onCreateReport={handleCreateReport} // optional handler for create flow
                   />
                 }
               />
@@ -405,6 +488,7 @@ export default function App() {
                   <AlertsPage
                     theme={theme}
                     alerts={alerts}
+                    
                   />
                 }
               />
