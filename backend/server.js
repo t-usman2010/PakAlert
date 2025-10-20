@@ -118,22 +118,6 @@ async function fetchWeather(city) {
   return res.data;
 }
 
-// --- OneCall fetch (current + minutely + hourly + daily + alerts) ---
-async function fetchOneCallByCoords(lat, lon) {
-  const key = `onecall:${lat},${lon}`;
-  const cached = cacheGet(key);
-  if (cached) return cached;
-
-  if (!OPENWEATHER_KEY) throw new Error("OPENWEATHER_KEY not configured");
-
-  const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&units=metric&appid=${OPENWEATHER_KEY}`;
-  const { data } = await axios.get(url);
-  cacheSet(key, data);
-  return data;
-}
-
-// --- Routes ---
-
 // Auth routes
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
@@ -212,18 +196,6 @@ app.get("/api/forecast", async (req, res) => {
   }
 });
 
-// --- OneCall (current, minutely, hourly, daily, alerts) ---
-app.get("/api/onecall", async (req, res) => {
-  try {
-    const city = req.query.city || "Lahore";
-    const { lat, lon, name } = await geocodeCity(city);
-    const data = await fetchOneCallByCoords(lat, lon);
-    data.location = { name, lat, lon };
-    res.json({ ok: true, data });
-  } catch (e) {
-    res.status(500).json({ ok: false, error: e.message });
-  }
-});
 
 // --- TimeMachine (historical) ---
 // expects: city and optional dt (unix seconds). If dt not provided, defaults to 24h ago.

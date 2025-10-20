@@ -7,7 +7,6 @@ import {
   getReports,
   getWeather,
   getForecast,
-  getOneCall,
   getAirPollution,
   createReport
 } from "./services/api";
@@ -188,7 +187,7 @@ export default function App() {
   const [city, setCity] = useState("Islamabad");
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
-  const [oneCall, setOneCall] = useState(null); // OneCall data (hourly/daily/alerts)
+  // OneCall removed — use weather + forecast
   const [airQuality, setAirQuality] = useState(null); // Air pollution data
   const [alerts, setAlerts] = useState([]);
   const [reports, setReports] = useState([]);
@@ -227,16 +226,14 @@ export default function App() {
     setLoadingForecast(true);
     
     try {
-      const [weatherData, forecastData, oneCallData, airData] = await Promise.all([
+      const [weatherData, forecastData, airData] = await Promise.all([
         getWeather(city),
         getForecast(city),
-        getOneCall(city).catch((err) => { console.warn("OneCall fetch failed:", err); return null; }),
         getAirPollution(city).catch((err) => { console.warn("AirPollution fetch failed:", err); return null; })
       ]);
-      
+
       setWeather(weatherData);
       setForecast(forecastData);
-      setOneCall(oneCallData);
       setAirQuality(airData);
       setErrorWeather(null);
       setErrorForecast(null);
@@ -453,26 +450,19 @@ export default function App() {
               <Route
                 path="/"
                 element={
-                  <HomePage
-                        city={city}
-                        setCity={setCity}
-                        weather={weather}
-                        forecast={forecast}
-                        oneCall={oneCall}           // pass full oneCall object
-                        hourly={oneCall?.hourly || []} // optional shorthand
-                        daily={oneCall?.daily || []}   // optional shorthand
-                        airQuality={airQuality}
-                        alerts={alerts}
-                        reports={reports}
-                        loadingWeather={loadingWeather}
-                        loadingForecast={loadingForecast}
-                        loadingHourly={loadingWeather} // same as weather for now
-                        errorWeather={errorWeather}
-                        errorForecast={errorForecast}
-                        errorHourly={errorWeather}     // same as weather for now
-                        theme={theme}
-                        onRetry={handleRefresh}
-                  />
+      <HomePage
+        city={city}
+        setCity={setCity}
+        weather={weather}
+        forecast={forecast}
+        airQuality={airQuality}
+        alerts={alerts}
+        reports={reports}
+        loadingWeather={loadingWeather}
+        loadingForecast={loadingForecast}
+        theme={theme}
+        onRetry={handleRefresh}
+      />
                 }
               />
               <Route 

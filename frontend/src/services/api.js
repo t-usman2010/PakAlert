@@ -41,34 +41,8 @@ export async function getForecast(city) {
 
 // 🌍 OneCall (current + hourly + daily + alerts)
 export async function getOneCall(city) {
-  const res = await axios.get(`${API_BASE}/onecall?city=${encodeURIComponent(city)}`);
-  if (!res.data || !res.data.ok || !res.data.data) {
-    throw new Error(res.data?.error || "Failed to fetch onecall data");
-  }
-
-  const data = res.data.data;
-
-  const hourly = data.hourly?.map((h) => ({
-    time: new Date(h.dt * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    temp: h.temp,
-    description: h.weather?.[0]?.description || "N/A",
-  })) || [];
-
-  return {
-    current: {
-      temperature: data.current?.temp,
-      feelsLike: data.current?.feels_like,
-      pressure: data.current?.pressure,
-      humidity: data.current?.humidity,
-      windSpeed: data.current?.wind_speed,
-      description: data.current?.weather?.[0]?.description || "N/A",
-      lastUpdated: data.current?.dt ? data.current.dt * 1000 : null,
-    },
-    hourly,
-    daily: data.daily || [],
-    alerts: data.alerts || [],
-    location: data.location || {},
-  };
+  // OneCall endpoint removed from backend. This helper is no longer available.
+  throw new Error('getOneCall removed: use getWeather + getForecast instead');
 }
 
 // 💨 Air Quality

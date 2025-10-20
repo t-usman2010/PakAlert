@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import CitySearch from '../components/CitySearch';
 import WeatherCard from '../components/WeatherCard';
 import ForecastChart from '../components/ForecastChart';
-import HourlyForecast from '../components/HourlyForcast';
 import CurrentWeatherDetails from '../components/CurrentWeatherdetails';
 import AirQuality from '../components/AirQualityCard';
 import { Cloud, CloudRain, Sun, AlertTriangle, RefreshCw } from 'lucide-react';
@@ -124,15 +123,12 @@ const HomePage = ({
   setCity,
   weather,
   forecast,
-  hourly = [],
   airQuality,
   loadingWeather = false,
   loadingForecast = false,
-  loadingHourly = false,
   loadingAirQuality = false,
   errorWeather,
   errorForecast,
-  errorHourly,
   errorAirQuality,
   theme,
   onRetry
@@ -163,27 +159,25 @@ const HomePage = ({
 
             {/* Current Weather Details */}
             {weather ? <CurrentWeatherDetails data={weather} theme={theme} /> : null}
-
-            {/* Air Quality */}
-            {loadingAirQuality ? <WeatherCardSkeleton theme={theme} /> :
-             errorAirQuality ? <ErrorState message={errorAirQuality} theme={theme} onRetry={onRetry} /> :
-             airQuality ? <AirQuality data={airQuality} theme={theme} /> :
-             <EmptyState theme={theme} type="airQuality" />}
           </motion.div>
 
           {/* Right Column */}
           <motion.div className="lg:col-span-2 space-y-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.6 }}>
+            
             {/* Forecast Chart */}
             {loadingForecast ? <ForecastSkeleton theme={theme} /> :
              errorForecast ? <ErrorState message={errorForecast} theme={theme} onRetry={onRetry} /> :
              forecast && forecast.length > 0 ? <ForecastChart data={forecast} theme={theme} /> :
              <EmptyState theme={theme} type="forecast" />}
 
-            {/* Hourly Forecast */}
-            {loadingHourly ? <ForecastSkeleton theme={theme} /> :
-             errorHourly ? <ErrorState message={errorHourly} theme={theme} onRetry={onRetry} /> :
-             hourly && hourly.length > 0 ? <HourlyForecast data={hourly} theme={theme} /> :
-             <EmptyState theme={theme} type="hourly" />}
+             {/* Air Quality - Wider */}
+            <div className="mb-6">
+              {loadingAirQuality ? <WeatherCardSkeleton theme={theme} /> :
+               errorAirQuality ? <ErrorState message={errorAirQuality} theme={theme} onRetry={onRetry} /> :
+               airQuality ? <AirQuality data={airQuality} theme={theme} /> :
+               <EmptyState theme={theme} type="airQuality" />}
+            </div>
+
           </motion.div>
         </div>
       </div>
