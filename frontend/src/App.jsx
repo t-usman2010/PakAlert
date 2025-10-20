@@ -454,20 +454,24 @@ export default function App() {
                 path="/"
                 element={
                   <HomePage
-                    city={city}
-                    setCity={setCity}
-                    weather={weather}
-                    forecast={forecast}
-                    oneCall={oneCall}
-                    airQuality={airQuality}
-                    alerts={alerts}
-                    reports={reports}
-                    loadingWeather={loadingWeather}
-                    loadingForecast={loadingForecast}
-                    errorWeather={errorWeather}
-                    errorForecast={errorForecast}
-                    theme={theme}
-                    onRetry={handleRefresh}
+                        city={city}
+                        setCity={setCity}
+                        weather={weather}
+                        forecast={forecast}
+                        oneCall={oneCall}           // pass full oneCall object
+                        hourly={oneCall?.hourly || []} // optional shorthand
+                        daily={oneCall?.daily || []}   // optional shorthand
+                        airQuality={airQuality}
+                        alerts={alerts}
+                        reports={reports}
+                        loadingWeather={loadingWeather}
+                        loadingForecast={loadingForecast}
+                        loadingHourly={loadingWeather} // same as weather for now
+                        errorWeather={errorWeather}
+                        errorForecast={errorForecast}
+                        errorHourly={errorWeather}     // same as weather for now
+                        theme={theme}
+                        onRetry={handleRefresh}
                   />
                 }
               />

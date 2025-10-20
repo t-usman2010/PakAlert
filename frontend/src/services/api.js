@@ -4,8 +4,7 @@ const API_BASE = process.env.REACT_APP_API_BASE;
 
 // ☀️ Current Weather
 export async function getWeather(city) {
-  const res = await axios.get(`${API_BASE}/weather?city=${city}`);
-
+  const res = await axios.get(`${API_BASE}/weather?city=${encodeURIComponent(city)}`);
   if (!res.data || !res.data.ok || !res.data.data) {
     throw new Error(res.data?.error || "Failed to fetch weather");
   }
@@ -15,16 +14,18 @@ export async function getWeather(city) {
   return {
     city: raw.name,
     temperature: raw.main?.temp,
+    feelsLike: raw.main?.feels_like,
+    pressure: raw.main?.pressure,
     description: raw.weather?.[0]?.description || "N/A",
     humidity: raw.main?.humidity ?? null,
     windSpeed: raw.wind?.speed ?? null,
+    lastUpdated: raw.dt ? raw.dt * 1000 : null,
   };
 }
 
 // 🌤 Forecast (5-day)
 export async function getForecast(city) {
-  const res = await axios.get(`${API_BASE}/forecast?city=${city}`);
-
+  const res = await axios.get(`${API_BASE}/forecast?city=${encodeURIComponent(city)}`);
   if (!res.data || !res.data.ok || !res.data.forecast) {
     throw new Error(res.data?.error || "Failed to fetch forecast");
   }
@@ -38,41 +39,51 @@ export async function getForecast(city) {
   }));
 }
 
-// 🚨 Alerts (Get All)
-export async function getAlerts() {
-  const res = await axios.get(`${API_BASE}/alerts`);
-  return res.data;
-}
-
-// 🧾 Reports (Get All)
-export async function getReports() {
-  const res = await axios.get(`${API_BASE}/reports`);
-  return res.data;
-}
-
-// 🌍 OneCall (current + hourly + daily)
+// 🌍 OneCall (current + hourly + daily + alerts)
 export async function getOneCall(city) {
   const res = await axios.get(`${API_BASE}/onecall?city=${encodeURIComponent(city)}`);
-  if (!res.data || !res.data.ok || !res.data.data)
+  if (!res.data || !res.data.ok || !res.data.data) {
     throw new Error(res.data?.error || "Failed to fetch onecall data");
-  return res.data.data;
+  }
+
+  const data = res.data.data;
+
+  const hourly = data.hourly?.map((h) => ({
+    time: new Date(h.dt * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    temp: h.temp,
+    description: h.weather?.[0]?.description || "N/A",
+  })) || [];
+
+  return {
+    current: {
+      temperature: data.current?.temp,
+      feelsLike: data.current?.feels_like,
+      pressure: data.current?.pressure,
+      humidity: data.current?.humidity,
+      windSpeed: data.current?.wind_speed,
+      description: data.current?.weather?.[0]?.description || "N/A",
+      lastUpdated: data.current?.dt ? data.current.dt * 1000 : null,
+    },
+    hourly,
+    daily: data.daily || [],
+    alerts: data.alerts || [],
+    location: data.location || {},
+  };
 }
 
-// 🕒 Time Machine (historical)
-export async function getTimeMachine(city, dt) {
-  const qs = `city=${encodeURIComponent(city)}${dt ? `&dt=${encodeInt(dt)}` : ""}`;
-  const res = await axios.get(`${API_BASE}/timemachine?${qs}`);
-  if (!res.data || !res.data.ok || !res.data.data)
-    throw new Error(res.data?.error || "Failed to fetch timemachine data");
-  return res.data.data;
-}
-
-// 💨 Air Quality (current)
+// 💨 Air Quality
 export async function getAirPollution(city) {
   const res = await axios.get(`${API_BASE}/air_pollution?city=${encodeURIComponent(city)}`);
-  if (!res.data || !res.data.ok || !res.data.data)
+  if (!res.data || !res.data.ok || !res.data.data) {
     throw new Error(res.data?.error || "Failed to fetch air pollution data");
-  return res.data;
+  }
+
+  const raw = res.data.data;
+  return {
+    aqi: raw.list?.[0]?.main?.aqi,
+    components: raw.list?.[0]?.components || {},
+    location: res.data.location || {},
+  };
 }
 
 // 🧭 Geocode (city → coords)
@@ -93,11 +104,17 @@ export async function reverseGeocode(lat, lon) {
   return res.data.data;
 }
 
-// 🗺️ Weather Map Tiles
-export async function getWeatherMapTiles(layer = "clouds_new") {
-  const res = await axios.get(`${API_BASE}/weather_map_tiles?layer=${encodeURIComponent(layer)}`);
-  if (!res.data || !res.data.ok || !res.data.template)
-    throw new Error(res.data?.error || "Failed to fetch weather map tiles template");
+// 🚨 Alerts
+export async function getAlerts() {
+  const res = await axios.get(`${API_BASE}/alerts`);
+  if (!res.data) throw new Error("Failed to fetch alerts");
+  return res.data;
+}
+
+// 🧾 Reports
+export async function getReports() {
+  const res = await axios.get(`${API_BASE}/reports`);
+  if (!res.data) throw new Error("Failed to fetch reports");
   return res.data;
 }
 
