@@ -15,7 +15,8 @@ const ReportForm = () => {
     
     try {
       await axios.post('/api/reports', { city, description });
-      setStatus('success');
+      // Report submitted but requires admin verification
+      setStatus('pending');
       setCity('');
       setDescription('');
     } catch (err) {
@@ -93,12 +94,12 @@ const ReportForm = () => {
         </button>
       </form>
 
-      {status === 'success' && (
-        <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-start">
-          <CheckCircle2 size={20} className="text-green-600 mr-3 mt-0.5 flex-shrink-0" />
+      {status === 'pending' && (
+        <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl flex items-start">
+          <CheckCircle2 size={20} className="text-yellow-600 mr-3 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-green-800 font-medium">Report submitted successfully!</p>
-            <p className="text-green-700 text-sm mt-1">Thank you for contributing to our weather data.</p>
+            <p className="text-yellow-800 font-medium">Report submitted — awaiting verification</p>
+            <p className="text-yellow-700 text-sm mt-1">Your report has been queued for admin review. It will appear publicly once approved.</p>
           </div>
         </div>
       )}

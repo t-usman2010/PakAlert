@@ -55,7 +55,8 @@ const ReportsPage = ({ theme, reports: initialReports, onReportSubmit }) => {
     
     try {
       await axios.post(`${API_BASE}/reports`, { reporter, location, description });
-      setStatus('success:Report submitted successfully!');
+      // Inform the user that report is submitted but needs admin verification
+      setStatus('success:Report submitted — awaiting admin verification');
       setReporter('');
       setLocation('');
       setDescription('');

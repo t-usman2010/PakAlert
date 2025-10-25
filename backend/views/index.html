@@ -269,30 +269,43 @@
       }
 
       // --- Fetch Initial Data ---
+      // Helper to fetch JSON and redirect to login if server returns HTML (not authenticated)
+      async function fetchJson(url, opts = {}) {
+        const res = await fetch(url, Object.assign({ credentials: 'same-origin' }, opts));
+        const ct = res.headers.get('content-type') || '';
+        if (!ct.includes('application/json')) {
+          // If the server returned HTML (likely a redirect to login), go to login page
+          console.warn('Expected JSON but got:', ct, 'redirecting to login.');
+          window.location.href = '/login.html';
+          throw new Error('Server did not return JSON (not authenticated?)');
+        }
+        return res.json();
+      }
       async function loadData() {
         try {
-          const [alertsRes, reportsRes] = await Promise.all([
-            fetch("/api/alerts"),
-            fetch("/api/reports")
+          // Admin portal should fetch all reports (including pending)
+          const [alertsDataRes, reportsDataRes] = await Promise.all([
+            fetchJson("/api/alerts"),
+            fetchJson("/api/admin/reports")
           ]);
-          
-          alertsData = await alertsRes.json();
-          reportsData = await reportsRes.json();
-          
-          // Update counters
+
+          alertsData = alertsDataRes;
+          reportsData = reportsDataRes;
+
+          // Clear current lists to avoid duplicates
+          alertsList.innerHTML = '';
+          reportsList.innerHTML = '';
+
+          // Update counters: active alerts and unverified reports
           document.getElementById('activeAlertsCount').textContent = alertsData.length;
-          document.getElementById('newReportsCount').textContent = reportsData.filter(r => {
-            // Consider reports from last 24 hours as "new"
-            const reportTime = new Date(r.createdAt);
-            const now = new Date();
-            return (now - reportTime) < (24 * 60 * 60 * 1000);
-          }).length;
-          
+          document.getElementById('newReportsCount').textContent = reportsData.filter(r => !r.verified).length;
+
           // Render data
           alertsData.forEach(renderAlert);
           reportsData.forEach(renderReport);
         } catch (error) {
           console.error("Failed to load data:", error);
+          showNotification('Failed to load admin data. See console for details.', 'error');
         }
       }
 
@@ -355,9 +368,14 @@
 
       // --- Render Report ---
       function renderReport(report) {
+        // Remove existing entry if present
+        const existing = document.getElementById('report-' + report._id);
+        if (existing) existing.remove();
+
         const div = document.createElement("div");
+        div.id = 'report-' + report._id;
         div.className = "bg-white p-5 rounded-xl shadow-sm border card-hover";
-        
+
         // Format date
         const reportDate = new Date(report.createdAt);
         const formattedDate = reportDate.toLocaleDateString('en-US', { 
@@ -367,7 +385,17 @@
           hour: '2-digit',
           minute: '2-digit'
         });
-        
+
+        // Status badge (Pending / Verified)
+        const statusBadge = report.verified
+          ? `<span class="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-800">Verified</span>`
+          : `<span class="text-xs font-medium px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">Pending</span>`;
+
+        // Approve button for pending reports
+        const approveBtn = !report.verified ?
+          `<button onclick="approveReport('${report._id}')" class="ml-2 px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">Approve</button>` :
+          '';
+
         div.innerHTML = `
           <div class="flex justify-between items-start">
             <div class="flex items-center space-x-3">
@@ -375,20 +403,39 @@
                 <i class="fas fa-user text-blue-500"></i>
               </div>
               <div>
-                <h3 class="font-semibold">${report.reporter || "Anonymous User"}</h3>
+                <h3 class="font-semibold">${report.reporter || "Anonymous User"} ${statusBadge}</h3>
                 <p class="text-sm text-gray-500">${formattedDate}</p>
               </div>
             </div>
-            <div class="flex items-center space-x-1 text-yellow-400">
-              <i class="fas fa-map-marker-alt text-sm text-gray-400 mr-1"></i>
-              <span class="text-sm text-gray-600">${report.location}</span>
+            <div class="flex items-center space-x-1">
+              <div class="text-sm text-gray-600 mr-2">${report.location || ''}</div>
+              ${approveBtn}
             </div>
           </div>
           <div class="mt-4 bg-gray-50 p-3 rounded-lg">
             <p class="text-gray-700">${report.description}</p>
           </div>
         `;
-        reportsList.appendChild(div);
+
+        // Prepend so newest appear at top
+        reportsList.prepend(div);
+      }
+
+      // Approve report (admin)
+      async function approveReport(id) {
+        try {
+          const updated = await fetchJson('/api/admin/reports/approve/' + id, { method: 'POST' });
+          // Update in-memory list and UI
+          const idx = reportsData.findIndex(r => r._id === updated._id);
+          if (idx !== -1) reportsData[idx] = updated;
+          renderReport(updated);
+          // update new reports counter
+          document.getElementById('newReportsCount').textContent = reportsData.filter(r => !r.verified).length;
+          showNotification('Report approved and is now public', 'success');
+        } catch (err) {
+          console.error('Approve failed', err);
+          showNotification('Failed to approve report', 'error');
+        }
       }
 
       // --- Save Alert ---
@@ -532,18 +579,39 @@
         if (el) el.remove();
       });
       
-      socket.on("report:new", (report) => {
-        reportsData.push(report);
-        
-        // Update new reports count if report is recent
-        const reportTime = new Date(report.createdAt);
-        const now = new Date();
-        if ((now - reportTime) < (24 * 60 * 60 * 1000)) {
-          document.getElementById('newReportsCount').textContent = 
-            parseInt(document.getElementById('newReportsCount').textContent) + 1;
-        }
-        
+      // New pending report (admin event)
+      socket.on("report:created", (report) => {
+        reportsData.unshift(report);
+        // Update unverified count
+        document.getElementById('newReportsCount').textContent = reportsData.filter(r => !r.verified).length;
         renderReport(report);
+        showNotification('New report received (pending)', 'info');
+      });
+
+      // A report was approved by admin (some admin instance)
+      socket.on("report:approved", (report) => {
+        const idx = reportsData.findIndex(r => r._id === report._id);
+        if (idx !== -1) {
+          reportsData[idx] = report;
+        } else {
+          reportsData.unshift(report);
+        }
+        // re-render updated report
+        renderReport(report);
+        // Update new reports counter
+        document.getElementById('newReportsCount').textContent = reportsData.filter(r => !r.verified).length;
+        showNotification('Report approved', 'success');
+      });
+
+      // Backwards compatibility: some clients may still emit report:new
+      socket.on("report:new", (report) => {
+        // treat as created if not verified
+        if (!report.verified) {
+          socket.emit('noop'); // no-op to keep socket active (placeholder)
+          reportsData.unshift(report);
+          document.getElementById('newReportsCount').textContent = reportsData.filter(r => !r.verified).length;
+          renderReport(report);
+        }
       });
 
       // --- Init ---

@@ -41,7 +41,7 @@ const Footer = ({ theme, lastUpdate }) => {
   const weatherStats = [
     { icon: Thermometer, label: 'Cities', value: '50+' },
     { icon: Cloud, label: 'Updates', value: '24/7' },
-    { icon: Droplets, label: 'Accuracy', value: '99%' },
+    { icon: Droplets, label: 'Accuracy', value: '85%' },
     { icon: Shield, label: 'Secure', value: 'SSL' }
   ];
 

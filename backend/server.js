@@ -67,6 +67,7 @@ const Report = mongoose.model(
     reporter: String,
     description: String,
     location: String,
+    verified: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
   })
 );
@@ -323,7 +324,8 @@ app.post("/api/alerts/delete/:id", async (req, res) => {
 // --- Reports CRUD (existing behavior) ---
 app.get("/api/reports", async (req, res) => {
   try {
-    const reports = await Report.find().sort({ createdAt: -1 });
+    // Public reports should only include verified ones
+    const reports = await Report.find({ verified: true }).sort({ createdAt: -1 });
     res.json(reports);
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
@@ -332,10 +334,38 @@ app.get("/api/reports", async (req, res) => {
 
 app.post("/api/reports", async (req, res) => {
   try {
-    const report = new Report(req.body);
+    // create as unverified; admins will later approve
+    const payload = Object.assign({}, req.body, { verified: false });
+    const report = new Report(payload);
     await report.save();
-    io.emit("report:new", report);
+    // notify admins/front-end that a new pending report exists
+    io.emit("report:created", report);
     res.json(report);
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+// --- Admin: list all reports (protected) ---
+app.get("/api/admin/reports", requireLogin, async (req, res) => {
+  try {
+    const reports = await Report.find().sort({ createdAt: -1 });
+    res.json(reports);
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+// --- Admin: approve a report ---
+app.post("/api/admin/reports/approve/:id", requireLogin, async (req, res) => {
+  try {
+    const updated = await Report.findByIdAndUpdate(req.params.id, { verified: true }, { new: true });
+    if (!updated) return res.status(404).json({ ok: false, error: 'Report not found' });
+    // notify clients that a report was approved (and now visible)
+    io.emit("report:approved", updated);
+    // also emit report:new so existing clients that listen for new reports receive it
+    io.emit("report:new", updated);
+    res.json(updated);
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
   }

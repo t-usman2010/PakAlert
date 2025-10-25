@@ -187,7 +187,6 @@ export default function App() {
   const [city, setCity] = useState("Islamabad");
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
-  // OneCall removed — use weather + forecast
   const [airQuality, setAirQuality] = useState(null); // Air pollution data
   const [alerts, setAlerts] = useState([]);
   const [reports, setReports] = useState([]);
