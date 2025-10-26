@@ -1,11 +1,18 @@
 // server.js
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const axios = require("axios");
-const path = require("path");
-const session = require("express-session");
+import dotenv from 'dotenv';
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
+import axios from 'axios';
+import path from 'path';
+import session from 'express-session';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+dotenv.config();
 
 // Initialize express app
 const app = express();
@@ -453,12 +460,23 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', environment: process.env.NODE_ENV });
 });
 
-// Handle both local and serverless
-if (process.env.VERCEL) {
-  module.exports = async (req, res) => {
+// Serverless handler
+const handler = async (req, res) => {
+  try {
     await connectToDatabase();
     return app(req, res);
-  };
-} else {
-  module.exports = app;
+  } catch (error) {
+    console.error('Handler error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+// Start server for local development
+if (process.env.NODE_ENV !== 'production') {
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => {
+    console.log(`✅ Server running at http://localhost:${port}`);
+  });
 }
+
+export default handler;
