@@ -1,41 +1,22 @@
 // server.js
-import dotenv from 'dotenv';
-import express from 'express';
-import cors from 'cors';
-import mongoose from 'mongoose';
-import axios from 'axios';
-import path from 'path';
-import session from 'express-session';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+require("dotenv").config();
+const express = require("express");
+const http = require("http");
+const cors = require("cors");
+const mongoose = require("mongoose");
+const axios = require("axios");
+const path = require("path");
+const session = require("express-session");
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-dotenv.config();
-
-// Initialize express app
 const app = express();
-
-// Handle both local and production CORS
-const corsOptions = {
-  origin: (origin, callback) => {
-    const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['*'];
-    if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
-};
-
-app.use(cors(corsOptions));
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server, { cors: { origin: "*" } });
 
 // --- Config / defaults ---
 const PORT = process.env.PORT ;
-const MONGODB_URI = process.env.MONGODB_URI;
-const SESSION_SECRET = process.env.SESSION_SECRET;
+const MONGO_URI = process.env.MONGO_URI ;
+const SESSION_SECRET = process.env.SESSION_SECRET ;
 const OPENWEATHER_KEY = process.env.OPENWEATHER_KEY;
 const ADMIN_USER = process.env.ADMIN_USER;
 const ADMIN_PASS = process.env.ADMIN_PASS;
@@ -398,85 +379,21 @@ io.on("connection", (socket) => {
   });
 });
 
-// Database connection with connection pooling
-let isConnected = false;
-
-const connectToDatabase = async () => {
-  if (isConnected) {
-    return;
-  }
-
-  try {
-    await mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      bufferCommands: false,
+// --- Start Server & Connect to Mongo ---
+mongoose
+  .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log("✅ MongoDB Connected");
+    server.listen(PORT, () => {
+      console.log(`✅ Server running at http://localhost:${PORT}`);
+      console.log(`👉 Open http://localhost:${PORT}/login.html to access Admin Portal`);
     });
-    isConnected = true;
-    console.log('✅ MongoDB Connected');
-  } catch (error) {
-    console.error('❌ MongoDB Connection Error:', error);
-    throw error;
-  }
-};
-
-// Handle local development
-if (process.env.NODE_ENV !== 'production') {
-  const port = process.env.PORT || 3000;
-  connectToDatabase().then(() => {
-    app.listen(port, () => {
-      console.log(`✅ Server running at http://localhost:${port}`);
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB Connection Error:", err.message);
+    // still try to start server if you want local dev without DB:
+    server.listen(PORT, () => {
+      console.log(`⚠️  Server running without DB at http://localhost:${PORT}`);
+      console.log(`👉 Open http://localhost:${PORT}/login.html to access Admin Portal`);
     });
   });
-}
-
-// Remove Socket.IO references since it's not supported in serverless
-app.post("/api/alerts", async (req, res) => {
-  try {
-    const alert = new Alert(req.body);
-    await alert.save();
-    res.json(alert);
-  } catch (e) {
-    res.status(500).json({ ok: false, error: e.message });
-  }
-});
-
-app.post("/api/alerts/update/:id", async (req, res) => {
-  try {
-    const { title, severity, description, actions } = req.body;
-    const updated = await Alert.findByIdAndUpdate(
-      req.params.id,
-      { title, severity, description, actions: actions || [] },
-      { new: true }
-    );
-    res.json(updated);
-  } catch (e) {
-    res.status(500).json({ ok: false, error: e.message });
-  }
-});
-
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', environment: process.env.NODE_ENV });
-});
-
-// Serverless handler
-const handler = async (req, res) => {
-  try {
-    await connectToDatabase();
-    return app(req, res);
-  } catch (error) {
-    console.error('Handler error:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
-
-// Start server for local development
-if (process.env.NODE_ENV !== 'production') {
-  const port = process.env.PORT || 3000;
-  app.listen(port, () => {
-    console.log(`✅ Server running at http://localhost:${port}`);
-  });
-}
-
-export default handler;
