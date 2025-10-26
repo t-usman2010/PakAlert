@@ -15,8 +15,8 @@ const io = new Server(server, { cors: { origin: "*" } });
 
 // --- Config / defaults ---
 const PORT = process.env.PORT ;
-const MONGO_URI = process.env.MONGO_URI ;
-const SESSION_SECRET = process.env.SESSION_SECRET ;
+const MONGODB_URI = process.env.MONGODB_URI;
+const SESSION_SECRET = process.env.SESSION_SECRET;
 const OPENWEATHER_KEY = process.env.OPENWEATHER_KEY;
 const ADMIN_USER = process.env.ADMIN_USER;
 const ADMIN_PASS = process.env.ADMIN_PASS;
@@ -380,20 +380,38 @@ io.on("connection", (socket) => {
 });
 
 // --- Start Server & Connect to Mongo ---
+const port = process.env.PORT ;
+
 mongoose
-  .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    retryWrites: true,
+    w: 'majority',
+    // Recommended settings for MongoDB Atlas
+    serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
+    socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+  })
   .then(() => {
     console.log("✅ MongoDB Connected");
-    server.listen(PORT, () => {
-      console.log(`✅ Server running at http://localhost:${PORT}`);
-      console.log(`👉 Open http://localhost:${PORT}/login.html to access Admin Portal`);
-    });
+    if (process.env.VERCEL) {
+      // In Vercel, we just need to connect to MongoDB
+      console.log("✅ Running on Vercel");
+    } else {
+      // For local development, start the server
+      server.listen(port, () => {
+        console.log(`✅ Server running at http://localhost:${port}`);
+        console.log(`👉 Open http://localhost:${port}/login.html to access Admin Portal`);
+      });
+    }
   })
   .catch((err) => {
     console.error("❌ MongoDB Connection Error:", err.message);
-    // still try to start server if you want local dev without DB:
-    server.listen(PORT, () => {
-      console.log(`⚠️  Server running without DB at http://localhost:${PORT}`);
-      console.log(`👉 Open http://localhost:${PORT}/login.html to access Admin Portal`);
-    });
+    if (!process.env.VERCEL) {
+      // Only start server locally if MongoDB fails
+      server.listen(port, () => {
+        console.log(`⚠️  Server running without DB at http://localhost:${port}`);
+        console.log(`👉 Open http://localhost:${port}/login.html to access Admin Portal`);
+      });
+    }
   });
