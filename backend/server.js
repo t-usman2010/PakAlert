@@ -10,13 +10,20 @@ const session = require("express-session");
 // Initialize express app
 const app = express();
 
-// Setup CORS
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.ALLOWED_ORIGINS 
-    : '*',
+// Handle both local and production CORS
+const corsOptions = {
+  origin: (origin, callback) => {
+    const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['*'];
+    if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
-}));
+};
+
+app.use(cors(corsOptions));
 
 // --- Config / defaults ---
 const PORT = process.env.PORT ;
@@ -384,52 +391,74 @@ io.on("connection", (socket) => {
   });
 });
 
-// Connect to MongoDB
-let cachedDb = null;
+// Database connection with connection pooling
+let isConnected = false;
 
-async function connectToDatabase() {
-  if (cachedDb) {
-    return cachedDb;
+const connectToDatabase = async () => {
+  if (isConnected) {
+    return;
   }
 
   try {
-    const db = await mongoose.connect(MONGODB_URI, {
+    await mongoose.connect(MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      retryWrites: true,
-      w: 'majority',
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
+      bufferCommands: false,
     });
-    
-    cachedDb = db;
-    console.log("✅ MongoDB Connected");
-    return db;
+    isConnected = true;
+    console.log('✅ MongoDB Connected');
   } catch (error) {
-    console.error("❌ MongoDB Connection Error:", error.message);
+    console.error('❌ MongoDB Connection Error:', error);
     throw error;
   }
-}
+};
 
-// Connect to MongoDB if we're running locally
+// Handle local development
 if (process.env.NODE_ENV !== 'production') {
   const port = process.env.PORT || 3000;
-  connectToDatabase()
-    .then(() => {
-      app.listen(port, () => {
-        console.log(`✅ Server running at http://localhost:${port}`);
-      });
-    })
-    .catch(console.error);
+  connectToDatabase().then(() => {
+    app.listen(port, () => {
+      console.log(`✅ Server running at http://localhost:${port}`);
+    });
+  });
 }
 
-// For Vercel serverless deployment
-export default async function handler(req, res) {
+// Remove Socket.IO references since it's not supported in serverless
+app.post("/api/alerts", async (req, res) => {
   try {
+    const alert = new Alert(req.body);
+    await alert.save();
+    res.json(alert);
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+app.post("/api/alerts/update/:id", async (req, res) => {
+  try {
+    const { title, severity, description, actions } = req.body;
+    const updated = await Alert.findByIdAndUpdate(
+      req.params.id,
+      { title, severity, description, actions: actions || [] },
+      { new: true }
+    );
+    res.json(updated);
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', environment: process.env.NODE_ENV });
+});
+
+// Handle both local and serverless
+if (process.env.VERCEL) {
+  module.exports = async (req, res) => {
     await connectToDatabase();
     return app(req, res);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Internal Server Error' });
-  }
+  };
+} else {
+  module.exports = app;
 }
