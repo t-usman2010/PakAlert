@@ -1,17 +1,22 @@
 // server.js
 require("dotenv").config();
 const express = require("express");
-const http = require("http");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const axios = require("axios");
 const path = require("path");
 const session = require("express-session");
 
+// Initialize express app
 const app = express();
-const server = http.createServer(app);
-const { Server } = require("socket.io");
-const io = new Server(server, { cors: { origin: "*" } });
+
+// Setup CORS
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.ALLOWED_ORIGINS 
+    : '*',
+  credentials: true
+}));
 
 // --- Config / defaults ---
 const PORT = process.env.PORT ;
@@ -379,39 +384,52 @@ io.on("connection", (socket) => {
   });
 });
 
-// --- Start Server & Connect to Mongo ---
-const port = process.env.PORT ;
+// Connect to MongoDB
+let cachedDb = null;
 
-mongoose
-  .connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    retryWrites: true,
-    w: 'majority',
-    // Recommended settings for MongoDB Atlas
-    serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
-    socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-  })
-  .then(() => {
+async function connectToDatabase() {
+  if (cachedDb) {
+    return cachedDb;
+  }
+
+  try {
+    const db = await mongoose.connect(MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      retryWrites: true,
+      w: 'majority',
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
+    
+    cachedDb = db;
     console.log("✅ MongoDB Connected");
-    if (process.env.VERCEL) {
-      // In Vercel, we just need to connect to MongoDB
-      console.log("✅ Running on Vercel");
-    } else {
-      // For local development, start the server
-      server.listen(port, () => {
+    return db;
+  } catch (error) {
+    console.error("❌ MongoDB Connection Error:", error.message);
+    throw error;
+  }
+}
+
+// Connect to MongoDB if we're running locally
+if (process.env.NODE_ENV !== 'production') {
+  const port = process.env.PORT || 3000;
+  connectToDatabase()
+    .then(() => {
+      app.listen(port, () => {
         console.log(`✅ Server running at http://localhost:${port}`);
-        console.log(`👉 Open http://localhost:${port}/login.html to access Admin Portal`);
       });
-    }
-  })
-  .catch((err) => {
-    console.error("❌ MongoDB Connection Error:", err.message);
-    if (!process.env.VERCEL) {
-      // Only start server locally if MongoDB fails
-      server.listen(port, () => {
-        console.log(`⚠️  Server running without DB at http://localhost:${port}`);
-        console.log(`👉 Open http://localhost:${port}/login.html to access Admin Portal`);
-      });
-    }
-  });
+    })
+    .catch(console.error);
+}
+
+// For Vercel serverless deployment
+export default async function handler(req, res) {
+  try {
+    await connectToDatabase();
+    return app(req, res);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
