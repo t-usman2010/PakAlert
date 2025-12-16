@@ -199,8 +199,11 @@
                 <p class="text-sm text-gray-500">Weather reports from users across Pakistan</p>
               </div>
               <div class="flex space-x-2">
-                <button class="px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-50">
-                  <i class="fas fa-download mr-1"></i> Export
+                <button onclick="printAllReports()" class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                  <i class="fas fa-print mr-1"></i> Print All Reports
+                </button>
+                <button onclick="printVerifiedReports()" class="px-3 py-1.5 text-sm border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50">
+                  <i class="fas fa-print mr-1"></i> Print Verified Only
                 </button>
               </div>
             </div>
@@ -387,14 +390,34 @@
         });
 
         // Status badge (Pending / Verified)
-        const statusBadge = report.verified
-          ? `<span class="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-800">Verified</span>`
-          : `<span class="text-xs font-medium px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">Pending</span>`;
+        // Verification badges
+        let verificationBadge = '';
+        if (report.autoVerified) {
+          verificationBadge = `<span class="text-xs font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-800"><i class="fas fa-check-circle"></i> Auto-Verified</span>`;
+        }
+        if (report.verified) {
+          verificationBadge += `<span class="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-800 ml-1"><i class="fas fa-user-check"></i> Admin Verified</span>`;
+        } else {
+          verificationBadge += `<span class="text-xs font-medium px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 ml-1"><i class="fas fa-clock"></i> Pending</span>`;
+        }
+
+        // Verification score indicator
+        const score = report.verificationScore || 0;
+        const scoreColor = score >= 70 ? 'text-green-600' : score >= 40 ? 'text-yellow-600' : 'text-red-600';
+        const scoreText = `<span class="text-xs ${scoreColor} font-medium">Score: ${score}/100</span>`;
+
+        // GPS coordinates display
+        const gpsInfo = report.coordinates && report.coordinates.latitude ?
+          `<div class="text-xs text-gray-500 mt-1"><i class="fas fa-map-marker-alt"></i> GPS: ${report.coordinates.latitude.toFixed(4)}, ${report.coordinates.longitude.toFixed(4)}</div>` :
+          `<div class="text-xs text-gray-400 mt-1"><i class="fas fa-map-marker-alt"></i> No GPS data</div>`;
 
         // Approve button for pending reports
         const approveBtn = !report.verified ?
-          `<button onclick="approveReport('${report._id}')" class="ml-2 px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">Approve</button>` :
+          `<button onclick="approveReport('${report._id}')" class="ml-2 px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"><i class="fas fa-check"></i> Approve</button>` :
           '';
+
+        // Print button
+        const printBtn = `<button onclick="printReport('${report._id}')" class="ml-2 px-3 py-1 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700"><i class="fas fa-print"></i> Print</button>`;
 
         div.innerHTML = `
           <div class="flex justify-between items-start">
@@ -403,17 +426,23 @@
                 <i class="fas fa-user text-blue-500"></i>
               </div>
               <div>
-                <h3 class="font-semibold">${report.reporter || "Anonymous User"} ${statusBadge}</h3>
+                <h3 class="font-semibold">${report.reporter || "Anonymous User"}</h3>
                 <p class="text-sm text-gray-500">${formattedDate}</p>
+                ${gpsInfo}
               </div>
             </div>
-            <div class="flex items-center space-x-1">
-              <div class="text-sm text-gray-600 mr-2">${report.location || ''}</div>
-              ${approveBtn}
+            <div class="flex flex-col items-end space-y-1">
+              <div>${verificationBadge}</div>
+              <div>${scoreText}</div>
+              <div class="text-sm text-gray-600">${report.location || ''}</div>
             </div>
           </div>
           <div class="mt-4 bg-gray-50 p-3 rounded-lg">
             <p class="text-gray-700">${report.description}</p>
+          </div>
+          <div class="mt-3 flex justify-end space-x-2">
+            ${approveBtn}
+            ${printBtn}
           </div>
         `;
 
@@ -613,6 +642,268 @@
           renderReport(report);
         }
       });
+
+      // --- Print Functions ---
+      function printReport(reportId) {
+        const report = reportsData.find(r => r._id === reportId);
+        if (!report) {
+          showNotification('Report not found', 'error');
+          return;
+        }
+
+        const printWindow = window.open('', '_blank', 'width=800,height=600');
+        const reportDate = new Date(report.createdAt).toLocaleString();
+        
+        let content = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>PakAlert Report - ${report.reporter}</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 40px; }
+              .header { text-align: center; border-bottom: 2px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px; }
+              .logo { font-size: 24px; color: #3b82f6; font-weight: bold; }
+              .report-info { margin: 20px 0; }
+              .label { font-weight: bold; color: #555; }
+              .value { margin-left: 10px; }
+              .section { margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 8px; }
+              .badge { display: inline-block; padding: 5px 10px; border-radius: 5px; font-size: 12px; }
+              .verified { background: #d1fae5; color: #065f46; }
+              .pending { background: #fef3c7; color: #92400e; }
+              .auto-verified { background: #dbeafe; color: #1e40af; }
+              .score { font-weight: bold; margin-top: 10px; }
+              .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; font-size: 12px; color: #888; }
+              @media print {
+                body { margin: 20px; }
+                .no-print { display: none; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <div class="logo">🌤️ PakAlert</div>
+              <h2>Weather Report</h2>
+            </div>
+            
+            <div class="report-info">
+              <p><span class="label">Report ID:</span><span class="value">${report._id}</span></p>
+              <p><span class="label">Reporter:</span><span class="value">${report.reporter || 'Anonymous'}</span></p>
+              <p><span class="label">Date & Time:</span><span class="value">${reportDate}</span></p>
+              <p><span class="label">Location:</span><span class="value">${report.location}</span></p>
+        `;
+
+        if (report.coordinates && report.coordinates.latitude) {
+          content += `
+              <p><span class="label">GPS Coordinates:</span><span class="value">${report.coordinates.latitude.toFixed(6)}, ${report.coordinates.longitude.toFixed(6)}</span></p>
+          `;
+        }
+
+        content += `
+              <p><span class="label">Verification Status:</span><span class="value">
+        `;
+
+        if (report.verified) {
+          content += `<span class="badge verified">✓ Admin Verified</span>`;
+        }
+        if (report.autoVerified) {
+          content += ` <span class="badge auto-verified">✓ Auto-Verified</span>`;
+        }
+        if (!report.verified && !report.autoVerified) {
+          content += `<span class="badge pending">⏳ Pending Review</span>`;
+        }
+
+        content += `</span></p>`;
+
+        if (report.verificationScore) {
+          const scoreColor = report.verificationScore >= 70 ? '#059669' : report.verificationScore >= 40 ? '#d97706' : '#dc2626';
+          content += `
+              <p class="score" style="color: ${scoreColor}">
+                <span class="label">Verification Score:</span><span class="value">${report.verificationScore}/100</span>
+              </p>
+          `;
+        }
+
+        content += `
+            </div>
+            
+            <div class="section">
+              <h3>Report Description</h3>
+              <p>${report.description}</p>
+            </div>
+        `;
+
+        if (report.weatherConditionAtTime) {
+          content += `
+            <div class="section">
+              <h3>Weather Conditions at Time of Report</h3>
+              <p><span class="label">Temperature:</span><span class="value">${(report.weatherConditionAtTime.temp - 273.15).toFixed(1)}°C</span></p>
+              <p><span class="label">Condition:</span><span class="value">${report.weatherConditionAtTime.description}</span></p>
+              <p><span class="label">Humidity:</span><span class="value">${report.weatherConditionAtTime.humidity}%</span></p>
+              <p><span class="label">Wind Speed:</span><span class="value">${report.weatherConditionAtTime.wind} m/s</span></p>
+            </div>
+          `;
+        }
+
+        content += `
+            <div class="footer">
+              <p>PakAlert Admin Portal - Weather Report System</p>
+              <p>Printed on: ${new Date().toLocaleString()}</p>
+            </div>
+            
+            <div class="no-print" style="margin-top: 30px; text-align: center;">
+              <button onclick="window.print()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                🖨️ Print Report
+              </button>
+              <button onclick="window.close()" style="padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+                ✕ Close
+              </button>
+            </div>
+          </body>
+          </html>
+        `;
+
+        printWindow.document.write(content);
+        printWindow.document.close();
+      }
+
+      function printAllReports() {
+        if (reportsData.length === 0) {
+          showNotification('No reports to print', 'error');
+          return;
+        }
+        printMultipleReports(reportsData);
+      }
+
+      function printVerifiedReports() {
+        const verifiedReports = reportsData.filter(r => r.verified || r.autoVerified);
+        if (verifiedReports.length === 0) {
+          showNotification('No verified reports to print', 'error');
+          return;
+        }
+        printMultipleReports(verifiedReports);
+      }
+
+      function printMultipleReports(reports) {
+        const printWindow = window.open('', '_blank', 'width=1000,height=800');
+        
+        let content = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>PakAlert Reports Summary</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 40px; }
+              .header { text-align: center; border-bottom: 2px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px; }
+              .logo { font-size: 24px; color: #3b82f6; font-weight: bold; }
+              .summary { background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 20px 0; }
+              .report-card { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; page-break-inside: avoid; }
+              .report-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+              .badge { display: inline-block; padding: 5px 10px; border-radius: 5px; font-size: 11px; }
+              .verified { background: #d1fae5; color: #065f46; }
+              .pending { background: #fef3c7; color: #92400e; }
+              .auto-verified { background: #dbeafe; color: #1e40af; }
+              .flagged { background: #fee2e2; color: #991b1b; }
+              .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+              .label { font-weight: bold; color: #555; font-size: 13px; }
+              .value { color: #333; font-size: 13px; }
+              .description { background: #f9f9f9; padding: 10px; border-radius: 5px; margin-top: 10px; font-size: 13px; }
+              .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; font-size: 12px; color: #888; }
+              @media print {
+                body { margin: 20px; }
+                .no-print { display: none; }
+                .report-card { page-break-inside: avoid; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <div class="logo">🌤️ PakAlert</div>
+              <h2>Weather Reports Summary</h2>
+              <p style="color: #666; font-size: 14px;">Generated on: ${new Date().toLocaleString()}</p>
+            </div>
+            
+            <div class="summary">
+              <h3>Summary Statistics</h3>
+              <p><strong>Total Reports:</strong> ${reports.length}</p>
+              <p><strong>Verified Reports:</strong> ${reports.filter(r => r.verified).length}</p>
+              <p><strong>Auto-Verified Reports:</strong> ${reports.filter(r => r.autoVerified).length}</p>
+              <p><strong>Pending Reports:</strong> ${reports.filter(r => !r.verified && !r.autoVerified && r.verificationScore >= 40).length}</p>
+              <p><strong>Flagged Reports:</strong> ${reports.filter(r => r.verificationScore < 40).length}</p>
+            </div>
+        `;
+
+        reports.forEach((report, index) => {
+          const reportDate = new Date(report.createdAt).toLocaleString();
+          let statusBadges = '';
+          
+          if (report.verified) statusBadges += '<span class="badge verified">✓ Admin Verified</span> ';
+          if (report.autoVerified) statusBadges += '<span class="badge auto-verified">✓ Auto-Verified</span> ';
+          if (!report.verified && !report.autoVerified) {
+            if (report.verificationScore >= 40) {
+              statusBadges += '<span class="badge pending">⏳ Pending</span> ';
+            } else {
+              statusBadges += '<span class="badge flagged">⚠ Flagged</span> ';
+            }
+          }
+
+          content += `
+            <div class="report-card">
+              <div class="report-header">
+                <div>
+                  <h3 style="margin: 0;">Report #${index + 1}</h3>
+                  <p style="margin: 5px 0; color: #666; font-size: 12px;">ID: ${report._id}</p>
+                </div>
+                <div>${statusBadges}</div>
+              </div>
+              
+              <div class="info-grid">
+                <div><span class="label">Reporter:</span> <span class="value">${report.reporter || 'Anonymous'}</span></div>
+                <div><span class="label">Date:</span> <span class="value">${reportDate}</span></div>
+                <div><span class="label">Location:</span> <span class="value">${report.location}</span></div>
+                <div><span class="label">Score:</span> <span class="value">${report.verificationScore || 0}/100</span></div>
+          `;
+
+          if (report.coordinates && report.coordinates.latitude) {
+            content += `
+                <div style="grid-column: 1 / -1;">
+                  <span class="label">GPS:</span> 
+                  <span class="value">${report.coordinates.latitude.toFixed(6)}, ${report.coordinates.longitude.toFixed(6)}</span>
+                </div>
+            `;
+          }
+
+          content += `
+              </div>
+              
+              <div class="description">
+                <strong>Description:</strong><br>
+                ${report.description}
+              </div>
+            </div>
+          `;
+        });
+
+        content += `
+            <div class="footer">
+              <p>PakAlert Admin Portal - Weather Report System</p>
+              <p>Total Reports Printed: ${reports.length}</p>
+            </div>
+            
+            <div class="no-print" style="margin-top: 30px; text-align: center;">
+              <button onclick="window.print()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                🖨️ Print All Reports
+              </button>
+              <button onclick="window.close()" style="padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+                ✕ Close
+              </button>
+            </div>
+          </body>
+          </html>
+        `;
+
+        printWindow.document.write(content);
+        printWindow.document.close();
+      }
 
       // --- Init ---
       document.addEventListener('DOMContentLoaded', function() {

@@ -54,12 +54,26 @@ const ReportsPage = ({ theme, reports: initialReports, onReportSubmit }) => {
     setIsSubmitting(true);
     
     try {
-      await axios.post(`${API_BASE}/reports`, { reporter, location, description });
+      const formData = new FormData();
+      formData.append('reporter', reporter);
+      formData.append('city', location);
+      formData.append('description', description);
+      if (image) {
+        formData.append('image', image);
+      }
+
+      await axios.post(`${API_BASE}/reports`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
       // Inform the user that report is submitted but needs admin verification
       setStatus('success:Report submitted — awaiting admin verification');
       setReporter('');
       setLocation('');
       setDescription('');
+      setImage(null);
       fetchReports();
       if (onReportSubmit) {
         onReportSubmit();

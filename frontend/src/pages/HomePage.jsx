@@ -5,6 +5,7 @@ import WeatherCard from '../components/WeatherCard';
 import ForecastChart from '../components/ForecastChart';
 import CurrentWeatherDetails from '../components/CurrentWeatherdetails';
 import AirQuality from '../components/AirQualityCard';
+import AIWeatherInsights from '../components/AIWeatherInsights';
 import { Cloud, CloudRain, Sun, AlertTriangle, RefreshCw } from 'lucide-react';
 
 // --- Skeletons ---
@@ -180,6 +181,22 @@ const HomePage = ({
 
           </motion.div>
         </div>
+
+        {/* AI Weather Insights - Full Width */}
+        {weather && (
+          <motion.div 
+            className="mt-8"
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 0.5, delay: 0.8 }}
+          >
+            <AIWeatherInsights 
+              theme={theme} 
+              weatherData={weather} 
+              city={city} 
+            />
+          </motion.div>
+        )}
       </div>
     </div>
   );

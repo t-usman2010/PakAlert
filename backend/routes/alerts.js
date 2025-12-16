@@ -15,9 +15,28 @@ module.exports = (io) => {
     }
   });
 
-  // Add alert
+  // Add alert with geo-location
   router.post("/", validateAlert, async (req, res) => {
     try {
+      // Geocode city if provided but no coordinates
+      if (req.body.location && req.body.location.city && !req.body.location.coordinates) {
+        try {
+          const axios = require('axios');
+          const geocodeUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(req.body.location.city)}&limit=1&appid=${process.env.OPENWEATHER_KEY}`;
+          const geoResponse = await axios.get(geocodeUrl);
+          
+          if (geoResponse.data && geoResponse.data.length > 0) {
+            req.body.location.coordinates = {
+              latitude: geoResponse.data[0].lat,
+              longitude: geoResponse.data[0].lon
+            };
+            req.body.location.address = `${geoResponse.data[0].name}, ${geoResponse.data[0].country}`;
+          }
+        } catch (geoError) {
+          console.warn("Geocoding failed:", geoError.message);
+        }
+      }
+
       const alert = new Alert(req.body);
       await alert.save();
       io.emit("alert:new", alert);

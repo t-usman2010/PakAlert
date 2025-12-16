@@ -1,0 +1,59 @@
+{
+  "short_name": "PakAlert",
+  "name": "PakAlert - Intelligent Weather Alert System",
+  "description": "Real-time weather monitoring and alert system for Pakistan with AI-powered insights",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#3b82f6",
+  "background_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "categories": ["weather", "news", "utilities"],
+  "screenshots": [
+    {
+      "src": "screenshot1.png",
+      "type": "image/png",
+      "sizes": "1280x720"
+    },
+    {
+      "src": "screenshot2.png",
+      "type": "image/png",
+      "sizes": "1280x720"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "View Alerts",
+      "short_name": "Alerts",
+      "description": "View current weather alerts",
+      "url": "/alerts",
+      "icons": [{ "src": "alert-icon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Submit Report",
+      "short_name": "Report",
+      "description": "Submit a weather report",
+      "url": "/reports",
+      "icons": [{ "src": "report-icon.png", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
