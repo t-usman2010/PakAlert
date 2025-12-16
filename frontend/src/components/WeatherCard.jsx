@@ -19,17 +19,17 @@ export default function WeatherCard({ city, data, theme }) {
     const desc = description?.toLowerCase() || '';
     
     if (desc.includes('sun') || desc.includes('clear')) {
-      return <Sun className={isLight ? "text-yellow-500" : "text-yellow-400"} size={36} />;
-    } else if (desc.includes('rain') || desc.includes('drizzle')) {
-      return <CloudRain className={isLight ? "text-blue-500" : "text-blue-400"} size={36} />;
-    } else if (desc.includes('snow') || desc.includes('blizzard')) {
-      return <CloudSnow className={isLight ? "text-blue-300" : "text-blue-300"} size={36} />;
-    } else if (desc.includes('cloud') || desc.includes('overcast')) {
-      return <Cloud className={isLight ? "text-gray-500" : "text-gray-400"} size={36} />;
+      return <Sun className={isLight ? 'text-yellow-500' : 'text-yellow-400'} size={36} />;
+    } else if (desc.includes('rain')) {
+      return <CloudRain className={isLight ? 'text-blue-500' : 'text-blue-400'} size={36} />;
     } else if (desc.includes('drizzle')) {
-      return <CloudDrizzle className={isLight ? "text-blue-400" : "text-blue-300"} size={36} />;
+      return <CloudDrizzle className={isLight ? 'text-blue-400' : 'text-blue-300'} size={36} />;
+    } else if (desc.includes('snow') || desc.includes('blizzard')) {
+      return <CloudSnow className={isLight ? 'text-blue-300' : 'text-blue-300'} size={36} />;
+    } else if (desc.includes('cloud') || desc.includes('overcast')) {
+      return <Cloud className={isLight ? 'text-gray-500' : 'text-gray-400'} size={36} />;
     } else {
-      return <Cloud className={isLight ? "text-gray-400" : "text-gray-500"} size={36} />;
+      return <Cloud className={isLight ? 'text-gray-400' : 'text-gray-500'} size={36} />;
     }
   };
 

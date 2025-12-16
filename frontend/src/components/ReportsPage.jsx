@@ -26,6 +26,7 @@ const ReportsPage = ({ theme, reports: initialReports, onReportSubmit }) => {
   const [reporter, setReporter] = useState('');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
+  const [image, setImage] = useState(null);
   const [status, setStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);

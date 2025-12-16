@@ -128,12 +128,12 @@ const AnimatedBackground = ({ theme }) => {
           <motion.div
             animate={{ opacity: [0.04, 0.08, 0.04] }}
             transition={{ duration: 5, repeat: Infinity, delay: 1 }}
-            className="absolute top-32 left-32 w-3 h-3 bg-blue-100/12 rounded-full filter blur-sm"
+            className='absolute top-32 left-32 w-3 h-3 bg-blue-100/12 rounded-full filter blur-sm'
           />
           <motion.div
             animate={{ opacity: [0.05, 0.09, 0.05] }}
             transition={{ duration: 7, repeat: Infinity, delay: 2 }}
-            className="absolute bottom-40 right-40 w-3 h-3 bg-indigo-200/10 rounded-full filter blur-sm"
+            className='absolute bottom-40 right-40 w-3 h-3 bg-indigo-200/10 rounded-full filter blur-sm'
           />
           <motion.div
             animate={{ 
@@ -324,41 +324,7 @@ export default function App() {
       const r = await getReports();
       setReports(Array.isArray(r) ? r : (r || []));
     } catch (err) {
-      console.warn("Failed to refresh reports:", err);
-    }
-  };
-
-  const handleCreateAlert = async (alertObj) => {
-    try {
-      const created = await createAlert(alertObj);
-      // server returns alert object; prepend
-      setAlerts(prev => [created, ...prev]);
-      return created;
-    } catch (err) {
-      console.error("Create alert failed:", err);
-      throw err;
-    }
-  };
-
-  const handleUpdateAlert = async (id, updateObj) => {
-    try {
-      const updated = await updateAlert(id, updateObj);
-      setAlerts(prev => prev.map(a => a._id === updated._id ? updated : a));
-      return updated;
-    } catch (err) {
-      console.error("Update alert failed:", err);
-      throw err;
-    }
-  };
-
-  const handleDeleteAlert = async (id) => {
-    try {
-      await deleteAlert(id);
-      setAlerts(prev => prev.filter(a => a._id !== id));
-      return true;
-    } catch (err) {
-      console.error("Delete alert failed:", err);
-      throw err;
+      console.warn('Failed to refresh reports:', err);
     }
   };
 
