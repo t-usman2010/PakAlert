@@ -517,10 +517,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👨‍💻 Author
 
 **Your Name**
-- Grade 12 Student
-- School: [Your School Name]
-- Email: your.email@example.com
-- GitHub: [@yourusername](https://github.com/yourusername)
+- Name: Taha Usman
+- Email: t.usman36412@gmail.com
+- GitHub: [@yourusername](https://github.com/t-usman2010)
 
 ---
 
@@ -537,7 +536,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-For support, email your.email@example.com or open an issue in the GitHub repository.
+For support, email t.usman36412@gmail.com or open an issue in the GitHub repository.
 
 ---
 

@@ -350,8 +350,7 @@ Text: #f1f5f9 (slate-100)
 ## ❓ Questions?
 
 - Create an issue with the "question" label
-- Email: support@pakalert.com
-- Join our Discord: [Link]
+- Email: t.usman36412@gmail.com
 
 ## 🏆 Recognition
 
