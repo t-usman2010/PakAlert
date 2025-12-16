@@ -47,10 +47,10 @@ const Footer = ({ theme, lastUpdate }) => {
 
   return (
     <motion.footer 
-      className={`mt-16 pt-8 pb-6 relative z-10 ${
+      className={`mt-20 pt-16 pb-8 relative z-10 ${
         isLight 
-          ? "border-t border-gray-200/50" 
-          : "border-t border-blue-700/20"
+          ? "bg-gradient-to-b from-white to-gray-50 border-t border-gray-200/50" 
+          : "bg-gradient-to-b from-slate-800/50 to-slate-900 border-t border-blue-700/30"
       }`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -58,9 +58,9 @@ const Footer = ({ theme, lastUpdate }) => {
     >
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Weather Stats */}
+        {/* Weather Stats - Enhanced */}
         <motion.div 
-          className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8"
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 1 }}
@@ -68,32 +68,38 @@ const Footer = ({ theme, lastUpdate }) => {
           {weatherStats.map((stat, index) => (
             <motion.div
               key={stat.label}
-              className={`text-center p-4 rounded-xl backdrop-blur-sm border ${
+              className={`card text-center p-6 hover:shadow-xl hover:border-blue-400 dark:hover:border-blue-500 group cursor-default ${
                 isLight 
-                  ? "bg-white/80 border-gray-200" 
-                  : "bg-blue-900/20 border border-blue-700/30"
+                  ? "bg-gradient-to-br from-white to-gray-50 border-gray-200" 
+                  : "bg-gradient-to-br from-slate-700/30 to-slate-800/30 border-slate-600/50"
               }`}
               whileHover={{ 
-                scale: 1.02,
+                scale: 1.05,
                 transition: { duration: 0.2 }
               }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 1 + index * 0.1 }}
             >
-              <stat.icon 
-                size={24} 
-                className={`mx-auto mb-2 ${
-                  isLight ? "text-blue-600" : "text-blue-400"
-                }`} 
-              />
-              <div className={`text-2xl font-bold mb-1 ${
-                isLight ? "text-gray-800" : "text-white"
+              <div className={`p-3 rounded-xl mx-auto mb-3 w-fit group-hover:scale-110 transition-transform ${
+                isLight 
+                  ? "bg-blue-100 group-hover:bg-blue-200" 
+                  : "bg-blue-900/40 group-hover:bg-blue-800/60"
+              }`}>
+                <stat.icon 
+                  size={24} 
+                  className={`${
+                    isLight ? "text-blue-600" : "text-blue-400"
+                  }`} 
+                />
+              </div>
+              <div className={`text-3xl font-bold mb-2 ${
+                isLight ? "text-gray-900" : "text-white"
               }`}>
                 {stat.value}
               </div>
-              <div className={`text-sm ${
-                isLight ? "text-gray-600" : "text-blue-200"
+              <div className={`text-sm font-medium ${
+                isLight ? "text-gray-600" : "text-blue-300"
               }`}>
                 {stat.label}
               </div>
@@ -101,8 +107,13 @@ const Footer = ({ theme, lastUpdate }) => {
           ))}
         </motion.div>
 
+        {/* Divider */}
+        <div className={`h-px mb-12 ${
+          isLight ? "bg-gray-200" : "bg-gradient-to-r from-transparent via-blue-700/30 to-transparent"
+        }`} />
+
         {/* Links and Information */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
           {/* Brand Section */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
