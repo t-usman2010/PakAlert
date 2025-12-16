@@ -380,20 +380,26 @@ io.on("connection", (socket) => {
 });
 
 // --- Start Server & Connect to Mongo ---
-mongoose
-  .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => {
-    console.log("✅ MongoDB Connected");
-    server.listen(PORT, () => {
-      console.log(`✅ Server running at http://localhost:${PORT}`);
-      console.log(`👉 Open http://localhost:${PORT}/login.html to access Admin Portal`);
+// Only listen locally, export for Vercel
+if (process.env.NODE_ENV !== 'production') {
+  mongoose
+    .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => {
+      console.log("✅ MongoDB Connected");
+      server.listen(PORT, () => {
+        console.log(`✅ Server running at http://localhost:${PORT}`);
+        console.log(`👉 Open http://localhost:${PORT}/login.html to access Admin Portal`);
+      });
+    })
+    .catch((err) => {
+      console.error("❌ MongoDB Connection Error:", err.message);
+      // still try to start server if you want local dev without DB:
+      server.listen(PORT, () => {
+        console.log(`⚠️  Server running without DB at http://localhost:${PORT}`);
+        console.log(`👉 Open http://localhost:${PORT}/login.html to access Admin Portal`);
+      });
     });
-  })
-  .catch((err) => {
-    console.error("❌ MongoDB Connection Error:", err.message);
-    // still try to start server if you want local dev without DB:
-    server.listen(PORT, () => {
-      console.log(`⚠️  Server running without DB at http://localhost:${PORT}`);
-      console.log(`👉 Open http://localhost:${PORT}/login.html to access Admin Portal`);
-    });
-  });
+}
+
+// Export for Vercel serverless
+module.exports = app;
