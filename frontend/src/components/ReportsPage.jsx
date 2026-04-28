@@ -27,6 +27,7 @@ const ReportsPage = ({ theme, reports: initialReports, onReportSubmit }) => {
   const [reporter, setReporter] = useState('');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
+  const [website, setWebsite] = useState('');
   const [status, setStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,12 +75,14 @@ const ReportsPage = ({ theme, reports: initialReports, onReportSubmit }) => {
         reporter: reporter.trim(),
         location: location.trim(),
         description: description.trim(),
+        website: website.trim(),
       });
 
       setStatus('success:Report submitted — awaiting admin verification');
       setReporter('');
       setLocation('');
       setDescription('');
+      setWebsite('');
       fetchReports();
 
       if (onReportSubmit) {
@@ -161,6 +164,18 @@ const ReportsPage = ({ theme, reports: initialReports, onReportSubmit }) => {
             </h2>
 
             <form onSubmit={handleSubmit} className='space-y-6'>
+              <div className='sr-only' aria-hidden='true'>
+                <label htmlFor='website'>Website</label>
+                <input
+                  id='website'
+                  type='text'
+                  tabIndex='-1'
+                  autoComplete='off'
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                />
+              </div>
+
               <div className='space-y-3'>
                 <label className={`flex items-center text-sm font-semibold ${isLight ? 'text-gray-700' : 'text-slate-300'}`}>
                   <User size={16} className='mr-2' />

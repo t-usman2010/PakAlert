@@ -68,9 +68,48 @@ const Report = mongoose.model(
     description: String,
     location: String,
     verified: { type: Boolean, default: false },
+    ipAddress: String,
+    userAgent: String,
     createdAt: { type: Date, default: Date.now },
   })
 );
+
+function looksLikeSpamReport(payload) {
+  const reporter = String(payload.reporter || '').trim();
+  const location = String(payload.location || '').trim();
+  const description = String(payload.description || '').trim();
+  const honeypot = String(payload.website || payload.honeypot || '').trim();
+
+  if (honeypot) {
+    return 'Spam detected';
+  }
+
+  if (!reporter || !location || !description) {
+    return 'Missing required fields';
+  }
+
+  if (reporter.length < 2 || location.length < 2 || description.length < 10) {
+    return 'Report content is too short';
+  }
+
+  const combined = `${reporter} ${location} ${description}`;
+  const urlPattern = /(https?:\/\/|www\.|\b[a-z0-9-]+\.(?:com|net|org|info|io|xyz)\b)/i;
+  if (urlPattern.test(combined)) {
+    return 'Links are not allowed in reports';
+  }
+
+  const repeatedCharPattern = /(.)\1{7,}/;
+  if (repeatedCharPattern.test(description.replace(/\s+/g, ''))) {
+    return 'Report looks like spam';
+  }
+
+  const repeatedWordPattern = /\b(\w+)(?:\W+\1){4,}\b/i;
+  if (repeatedWordPattern.test(description)) {
+    return 'Report looks repetitive';
+  }
+
+  return null;
+}
 
 // --- Caching ---
 const cache = new Map();
@@ -334,8 +373,17 @@ app.get("/api/reports", async (req, res) => {
 
 app.post("/api/reports", async (req, res) => {
   try {
+    const spamReason = looksLikeSpamReport(req.body);
+    if (spamReason) {
+      return res.status(400).json({ ok: false, error: spamReason });
+    }
+
     // create as unverified; admins will later approve
-    const payload = Object.assign({}, req.body, { verified: false });
+    const payload = Object.assign({}, req.body, {
+      verified: false,
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'],
+    });
     const report = new Report(payload);
     await report.save();
     // notify admins/front-end that a new pending report exists

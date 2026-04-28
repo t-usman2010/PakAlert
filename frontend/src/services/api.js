@@ -40,7 +40,7 @@ export async function getForecast(city) {
 }
 
 // 🌍 OneCall (current + hourly + daily + alerts)
-export async function getOneCall(city) {
+export async function getOneCall() {
   // OneCall endpoint removed from backend. This helper is no longer available.
   throw new Error('getOneCall removed: use getWeather + getForecast instead');
 }
@@ -98,11 +98,4 @@ export async function createReport(reportObj) {
   if (!res.data || res.data?.ok === false)
     throw new Error(res.data?.error || 'Failed to create report');
   return res.data;
-}
-
-// 🔢 Helper
-function encodeInt(v) {
-  const n = parseInt(v, 10);
-  if (Number.isNaN(n)) return '';
-  return n.toString();
 }

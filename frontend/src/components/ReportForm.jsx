@@ -6,6 +6,7 @@ const ReportForm = () => {
   const [reporter, setReporter] = useState('');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
+  const [website, setWebsite] = useState('');
   const [status, setStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -19,12 +20,14 @@ const ReportForm = () => {
         reporter: reporter.trim(),
         location: location.trim(),
         description: description.trim(),
+        website: website.trim(),
       });
       // Report submitted but requires admin verification
       setStatus('pending');
       setReporter('');
       setLocation('');
       setDescription('');
+      setWebsite('');
     } catch (err) {
       setStatus('error');
     } finally {
@@ -43,6 +46,18 @@ const ReportForm = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="sr-only" aria-hidden="true">
+          <label htmlFor="website">Website</label>
+          <input
+            id="website"
+            type="text"
+            tabIndex="-1"
+            autoComplete="off"
+            value={website}
+            onChange={e => setWebsite(e.target.value)}
+          />
+        </div>
+
         <div className="space-y-2">
           <label className="flex items-center text-sm font-medium text-gray-700">
             <Send size={16} className="mr-2" />
