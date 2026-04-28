@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { Send, MapPin, FileText, AlertCircle, CheckCircle2, Loader } from 'lucide-react';
+import { createReport } from '../services/api';
 
 const ReportForm = () => {
-  const [city, setCity] = useState('');
+  const [reporter, setReporter] = useState('');
+  const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -14,10 +15,15 @@ const ReportForm = () => {
     setIsLoading(true);
     
     try {
-      await axios.post('/api/reports', { city, description });
+      await createReport({
+        reporter: reporter.trim(),
+        location: location.trim(),
+        description: description.trim(),
+      });
       // Report submitted but requires admin verification
       setStatus('pending');
-      setCity('');
+      setReporter('');
+      setLocation('');
       setDescription('');
     } catch (err) {
       setStatus('error');
@@ -39,23 +45,41 @@ const ReportForm = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
           <label className="flex items-center text-sm font-medium text-gray-700">
-            <MapPin size={16} className="mr-2" />
-            City Name
+            <Send size={16} className="mr-2" />
+            Your Name
           </label>
           <div className="relative">
             <input
               type="text"
-              value={city}
-              onChange={e => setCity(e.target.value)}
+              value={reporter}
+              onChange={e => setReporter(e.target.value)}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 pl-11 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              placeholder="Enter city name..."
+              placeholder="Enter your name..."
+              required
+              disabled={isLoading}
+            />
+            <Send size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="flex items-center text-sm font-medium text-gray-700">
+            <MapPin size={16} className="mr-2" />
+            Location
+          </label>
+          <div className="relative">
+            <input
+              type="text"
+              value={location}
+              onChange={e => setLocation(e.target.value)}
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 pl-11 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              placeholder="City, State or specific location..."
               required
               disabled={isLoading}
             />
             <MapPin size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
           </div>
         </div>
-
         <div className="space-y-2">
           <label className="flex items-center text-sm font-medium text-gray-700">
             <FileText size={16} className="mr-2" />
@@ -67,7 +91,7 @@ const ReportForm = () => {
               onChange={e => setDescription(e.target.value)}
               rows={4}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 pl-11 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
-              placeholder="Describe current weather conditions, temperature, precipitation, etc."
+              placeholder="Describe current weather conditions, temperature, precipitation, wind, etc."
               required
               disabled={isLoading}
             />
@@ -88,7 +112,7 @@ const ReportForm = () => {
           ) : (
             <>
               <Send size={20} className="mr-2" />
-              Submit Report
+              Submit Weather Report
             </>
           )}
         </button>

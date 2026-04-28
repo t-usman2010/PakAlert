@@ -524,6 +524,8 @@
           `<button onclick="approveReport('${report._id}')" class="ml-2 px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"><i class="fas fa-check"></i> Approve</button>` :
           '';
 
+        const deleteBtn = `<button onclick="deleteReport('${report._id}')" class="ml-2 px-3 py-1 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700"><i class="fas fa-trash"></i> Delete</button>`;
+
         // Print button
         const printBtn = `<button onclick="printReport('${report._id}')" class="ml-2 px-3 py-1 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700"><i class="fas fa-print"></i> Print</button>`;
 
@@ -550,6 +552,7 @@
           </div>
           <div class="mt-3 flex justify-end space-x-2">
             ${approveBtn}
+            ${deleteBtn}
             ${printBtn}
           </div>
         `;
@@ -572,6 +575,23 @@
         } catch (err) {
           console.error('Approve failed', err);
           showNotification('Failed to approve report', 'error');
+        }
+      }
+
+      // Delete report (admin)
+      async function deleteReport(id) {
+        if (!confirm('Delete this report from the database? This cannot be undone.')) return;
+
+        try {
+          await fetchJson('/api/admin/reports/delete/' + id, { method: 'POST' });
+          reportsData = reportsData.filter(r => r._id !== id);
+          const el = document.getElementById('report-' + id);
+          if (el) el.remove();
+          document.getElementById('newReportsCount').textContent = reportsData.filter(r => !r.verified).length;
+          showNotification('Report deleted successfully', 'success');
+        } catch (err) {
+          console.error('Delete report failed', err);
+          showNotification('Failed to delete report', 'error');
         }
       }
 
@@ -738,6 +758,14 @@
         // Update new reports counter
         document.getElementById('newReportsCount').textContent = reportsData.filter(r => !r.verified).length;
         showNotification('Report approved', 'success');
+      });
+
+      socket.on("report:deleted", (deletedId) => {
+        reportsData = reportsData.filter(r => r._id !== deletedId);
+        document.getElementById('newReportsCount').textContent = reportsData.filter(r => !r.verified).length;
+        const el = document.getElementById('report-' + deletedId);
+        if (el) el.remove();
+        showNotification('Report deleted', 'success');
       });
 
       // Backwards compatibility: some clients may still emit report:new

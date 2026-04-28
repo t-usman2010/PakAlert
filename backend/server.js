@@ -371,6 +371,19 @@ app.post("/api/admin/reports/approve/:id", requireLogin, async (req, res) => {
   }
 });
 
+// --- Admin: delete a report ---
+app.post("/api/admin/reports/delete/:id", requireLogin, async (req, res) => {
+  try {
+    const deleted = await Report.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ ok: false, error: 'Report not found' });
+
+    io.emit("report:deleted", deleted._id);
+    res.json({ ok: true, deletedId: deleted._id });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
 // --- Socket.IO ---
 io.on("connection", (socket) => {
   console.log("⚡ Client connected:", socket.id);
