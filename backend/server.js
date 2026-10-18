@@ -27,6 +27,28 @@ if (!OPENWEATHER_KEY) {
   console.warn("⚠️  OPENWEATHER_KEY is not set. Some endpoints will fail without it.");
 }
 
+let databaseConnection;
+
+function connectToDatabase() {
+  if (mongoose.connection.readyState === 1) {
+    return Promise.resolve();
+  }
+
+  if (!databaseConnection) {
+    databaseConnection = mongoose
+      .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+      .then(() => {
+        console.log("✅ MongoDB Connected");
+      })
+      .catch((error) => {
+        databaseConnection = undefined;
+        throw error;
+      });
+  }
+
+  return databaseConnection;
+}
+
 // --- Middleware ---
 app.use(cors());
 app.use(express.json());
@@ -51,14 +73,17 @@ function requireLogin(req, res, next) {
   next();
 }
 
-function requireDatabase(req, res, next) {
-  if (mongoose.connection.readyState !== 1) {
+async function requireDatabase(req, res, next) {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (error) {
+    console.error("❌ MongoDB Connection Error:", error.message);
     return res.status(503).json({
       ok: false,
-      error: "Database is not connected. Check MONGO_URI and MongoDB availability."
+      error: "Database is unavailable. Check the MongoDB connection configuration."
     });
   }
-  next();
 }
 
 // --- MongoDB Models ---
@@ -453,12 +478,9 @@ io.on("connection", (socket) => {
 });
 
 // --- Start Server & Connect to Mongo ---
-// Only listen locally, export for Vercel
 if (process.env.NODE_ENV !== 'production') {
-  mongoose
-    .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  connectToDatabase()
     .then(() => {
-      console.log("✅ MongoDB Connected");
       server.listen(PORT, () => {
         console.log(`✅ Server running at http://localhost:${PORT}`);
         console.log(`👉 Open http://localhost:${PORT}/login.html to access Admin Portal`);
@@ -474,5 +496,4 @@ if (process.env.NODE_ENV !== 'production') {
     });
 }
 
-// Export for Vercel serverless
 module.exports = app;
