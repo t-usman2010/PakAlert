@@ -21,6 +21,8 @@ const OPENWEATHER_KEY = process.env.OPENWEATHER_KEY;
 const ADMIN_USER = process.env.ADMIN_USER;
 const ADMIN_PASS = process.env.ADMIN_PASS;
 
+mongoose.set("bufferCommands", false);
+
 if (!OPENWEATHER_KEY) {
   console.warn("⚠️  OPENWEATHER_KEY is not set. Some endpoints will fail without it.");
 }
@@ -45,6 +47,16 @@ app.use(express.static(path.join(__dirname, "views")));
 function requireLogin(req, res, next) {
   if (!req.session.user) {
     return res.redirect("/login.html");
+  }
+  next();
+}
+
+function requireDatabase(req, res, next) {
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      ok: false,
+      error: "Database is not connected. Check MONGO_URI and MongoDB availability."
+    });
   }
   next();
 }
@@ -315,7 +327,7 @@ app.get("/api/weather_map_tiles", (req, res) => {
 });
 
 // --- Alerts CRUD (existing behavior) ---
-app.get("/api/alerts", async (req, res) => {
+app.get("/api/alerts", requireDatabase, async (req, res) => {
   try {
     const alerts = await Alert.find().sort({ createdAt: -1 });
     res.json(alerts);
@@ -324,7 +336,7 @@ app.get("/api/alerts", async (req, res) => {
   }
 });
 
-app.post("/api/alerts", async (req, res) => {
+app.post("/api/alerts", requireDatabase, async (req, res) => {
   try {
     const alert = new Alert(req.body);
     await alert.save();
@@ -335,7 +347,7 @@ app.post("/api/alerts", async (req, res) => {
   }
 });
 
-app.post("/api/alerts/update/:id", async (req, res) => {
+app.post("/api/alerts/update/:id", requireDatabase, async (req, res) => {
   try {
     const { title, severity, description, actions } = req.body;
     const updated = await Alert.findByIdAndUpdate(
@@ -350,7 +362,7 @@ app.post("/api/alerts/update/:id", async (req, res) => {
   }
 });
 
-app.post("/api/alerts/delete/:id", async (req, res) => {
+app.post("/api/alerts/delete/:id", requireDatabase, async (req, res) => {
   try {
     await Alert.findByIdAndDelete(req.params.id);
     io.emit("alert:deleted", req.params.id);
@@ -361,7 +373,7 @@ app.post("/api/alerts/delete/:id", async (req, res) => {
 });
 
 // --- Reports CRUD (existing behavior) ---
-app.get("/api/reports", async (req, res) => {
+app.get("/api/reports", requireDatabase, async (req, res) => {
   try {
     // Public reports should only include verified ones
     const reports = await Report.find({ verified: true }).sort({ createdAt: -1 });
@@ -371,7 +383,7 @@ app.get("/api/reports", async (req, res) => {
   }
 });
 
-app.post("/api/reports", async (req, res) => {
+app.post("/api/reports", requireDatabase, async (req, res) => {
   try {
     const spamReason = looksLikeSpamReport(req.body);
     if (spamReason) {
@@ -395,7 +407,7 @@ app.post("/api/reports", async (req, res) => {
 });
 
 // --- Admin: list all reports (protected) ---
-app.get("/api/admin/reports", requireLogin, async (req, res) => {
+app.get("/api/admin/reports", requireLogin, requireDatabase, async (req, res) => {
   try {
     const reports = await Report.find().sort({ createdAt: -1 });
     res.json(reports);
@@ -405,7 +417,7 @@ app.get("/api/admin/reports", requireLogin, async (req, res) => {
 });
 
 // --- Admin: approve a report ---
-app.post("/api/admin/reports/approve/:id", requireLogin, async (req, res) => {
+app.post("/api/admin/reports/approve/:id", requireLogin, requireDatabase, async (req, res) => {
   try {
     const updated = await Report.findByIdAndUpdate(req.params.id, { verified: true }, { new: true });
     if (!updated) return res.status(404).json({ ok: false, error: 'Report not found' });
@@ -420,7 +432,7 @@ app.post("/api/admin/reports/approve/:id", requireLogin, async (req, res) => {
 });
 
 // --- Admin: delete a report ---
-app.post("/api/admin/reports/delete/:id", requireLogin, async (req, res) => {
+app.post("/api/admin/reports/delete/:id", requireLogin, requireDatabase, async (req, res) => {
   try {
     const deleted = await Report.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ ok: false, error: 'Report not found' });

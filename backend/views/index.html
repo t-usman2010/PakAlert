@@ -390,7 +390,11 @@
           window.location.href = '/login.html';
           throw new Error('Server did not return JSON (not authenticated?)');
         }
-        return res.json();
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || `Request failed with status ${res.status}`);
+        }
+        return data;
       }
       async function loadData() {
         try {
@@ -399,6 +403,10 @@
             fetchJson("/api/alerts"),
             fetchJson("/api/admin/reports")
           ]);
+
+          if (!Array.isArray(alertsDataRes) || !Array.isArray(reportsDataRes)) {
+            throw new Error('Admin API returned an invalid data format.');
+          }
 
           alertsData = alertsDataRes;
           reportsData = reportsDataRes;
